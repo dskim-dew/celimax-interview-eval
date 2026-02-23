@@ -28,7 +28,7 @@ body {
 @layer components {
   /* 글래스모피즘 카드 스타일 */
   .glass-card {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl;
+    @apply bg-slate-900/75 backdrop-blur-sm border border-slate-700/60 rounded-xl shadow-xl;
   }
 
   .glass-card-dark {

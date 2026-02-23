@@ -1,11 +1,16 @@
+// 인터뷰 차수
+export type InterviewRound = '1차' | '2차' | '기타';
+
 // 면접 기본 정보
 export interface InterviewInfo {
   interviewerName: string;
+  reportAuthor: string;
   position: string;
   candidateName: string;
   tiroScript: string;
-  transcript: string;
+  transcript?: string;
   interviewDate: string;
+  interviewRound: InterviewRound;
 }
 
 // 핵심 가치 평가 점수

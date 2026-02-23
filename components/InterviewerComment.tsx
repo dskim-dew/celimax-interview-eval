@@ -10,6 +10,43 @@ interface InterviewerCommentProps {
   readOnly?: boolean;
 }
 
+function handleMarkdownKeyDown(
+  e: React.KeyboardEvent<HTMLTextAreaElement>,
+  field: keyof InterviewerNotes,
+  notes: InterviewerNotes,
+  onChange: (notes: InterviewerNotes) => void
+) {
+  if (e.key !== 'Enter') return;
+
+  const textarea = e.currentTarget;
+  const { selectionStart, value } = textarea;
+  const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+  const currentLine = value.substring(lineStart, selectionStart);
+  const bulletMatch = currentLine.match(/^(\s*- )/);
+
+  if (!bulletMatch) return;
+
+  e.preventDefault();
+  const prefix = bulletMatch[1];
+
+  // 불렛만 있고 내용이 없으면 불렛 제거
+  if (currentLine.trimEnd() === '-' || currentLine === prefix) {
+    const newValue = value.substring(0, lineStart) + '\n' + value.substring(selectionStart);
+    onChange({ ...notes, [field]: newValue });
+    setTimeout(() => {
+      textarea.selectionStart = textarea.selectionEnd = lineStart + 1;
+    }, 0);
+    return;
+  }
+
+  // 새 줄에 불렛 자동 추가
+  const newValue = value.substring(0, selectionStart) + '\n' + prefix + value.substring(selectionStart);
+  onChange({ ...notes, [field]: newValue });
+  setTimeout(() => {
+    textarea.selectionStart = textarea.selectionEnd = selectionStart + 1 + prefix.length;
+  }, 0);
+}
+
 export default function InterviewerComment({ notes, onChange, readOnly = false }: InterviewerCommentProps) {
   return (
     <div className="glass-card overflow-hidden">
@@ -66,7 +103,8 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
               <textarea
                 value={notes.strengths}
                 onChange={(e) => onChange({ ...notes, strengths: e.target.value })}
-                placeholder="이 지원자와 함께 일하고 싶은 이유, 기대되는 점을 작성해주세요..."
+                onKeyDown={(e) => handleMarkdownKeyDown(e, 'strengths', notes, onChange)}
+                placeholder="이 지원자와 함께 일하고 싶은 이유, 기대되는 점을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
                 className="w-full px-4 py-3 bg-white/10 border border-emerald-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition resize-none"
               />
@@ -81,7 +119,8 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
               <textarea
                 value={notes.concerns}
                 onChange={(e) => onChange({ ...notes, concerns: e.target.value })}
-                placeholder="채용 시 우려되는 점, 리스크 요인을 작성해주세요..."
+                onKeyDown={(e) => handleMarkdownKeyDown(e, 'concerns', notes, onChange)}
+                placeholder="채용 시 우려되는 점, 리스크 요인을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
                 className="w-full px-4 py-3 bg-white/10 border border-amber-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-none"
               />
@@ -96,7 +135,8 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
               <textarea
                 value={notes.validation}
                 onChange={(e) => onChange({ ...notes, validation: e.target.value })}
-                placeholder="2차 면접이나 레퍼런스 체크에서 확인이 필요한 부분을 작성해주세요..."
+                onKeyDown={(e) => handleMarkdownKeyDown(e, 'validation', notes, onChange)}
+                placeholder="2차 면접이나 레퍼런스 체크에서 확인이 필요한 부분을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
                 className="w-full px-4 py-3 bg-white/10 border border-blue-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none"
               />

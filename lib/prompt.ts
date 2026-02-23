@@ -23,8 +23,10 @@ const CRITERIA = `**가치관 평가 (1-5점):**
 
 const FIELD_RULES = `**필드 규칙:**
 - evidence: 면접자의 1인칭 직접 발언만. 추임새(음,어,네) 제거, 불완전 문장은 재구성. ❌"지원자는 ~했다" ✅"저는 팀장님께 직접 문제를 제기했습니다"
-- specificCase: 상황+맥락+결과 포함한 3인칭 사례 설명
-- concerns: 우려사항 없으면 빈 배열 []`;
+- specificCase: 상황+맥락+결과 포함한 3인칭 사례 설명. 음슴체 또는 명사형으로 마무리. 예) "~한 경험 있음", "~를 주도적으로 해결한 사례", "~로 인해 성과 달성"
+- concerns: 우려사항 없으면 빈 배열 []. 있을 경우 음슴체 또는 명사형으로 마무리. 예) "~에 대한 구체성 부족", "~역량 검증 필요"
+- summary(values/competencies): 음슴체 또는 명사형으로 마무리. 예) "~한 태도 보임", "~역량 갖춤", "~에 강점 있음"
+- finalComment: 반드시 '-입니다.' 체(존대체)로 작성. 예) "~한 역량을 보여주었습니다. ~점이 인상적이었습니다."`;
 
 const JSON_RULES = `**출력: JSON만, {로 시작 }로 끝, 코드블록/설명문 없이.**`;
 
@@ -73,6 +75,7 @@ ${trimmedTranscript}`;
 포지션: ${interviewInfo.position}
 지원자: ${interviewInfo.candidateName}
 면접일: ${interviewInfo.interviewDate}
+인터뷰 차수: ${interviewInfo.interviewRound ?? '-'}
 
 ${scriptSection}
 
@@ -131,6 +134,7 @@ export function buildEvaluationFromQnAPrompt(interviewInfo: InterviewInfo, qnaDa
 포지션: ${interviewInfo.position}
 지원자: ${interviewInfo.candidateName}
 면접일: ${interviewInfo.interviewDate}
+인터뷰 차수: ${interviewInfo.interviewRound ?? '-'}
 
 **정리된 Q&A:**
 ━━━━━━━━━━━━━━━━━━━━
@@ -154,6 +158,7 @@ export function buildDemoPrompt(interviewInfo: InterviewInfo): string {
 포지션: ${interviewInfo.position}
 지원자: ${interviewInfo.candidateName}
 면접일: ${interviewInfo.interviewDate}
+인터뷰 차수: ${interviewInfo.interviewRound ?? '-'}
 ${interviewInfo.tiroScript ? `\n**참조 스크립트:**\n${interviewInfo.tiroScript}` : ''}
 ${interviewInfo.transcript ? `\n**참조 메모:**\n${interviewInfo.transcript}` : ''}
 
