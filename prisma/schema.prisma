@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model InterviewReport {
+  id               String   @id @default(uuid())
+  candidateName    String   @map("candidate_name")
+  position         String
+  interviewDate    String   @map("interview_date")
+  interviewRound   String?  @map("interview_round")
+  interviewerName  String   @map("interviewer_name")
+  reportAuthor     String   @default("") @map("report_author")
+  tiroScript       String   @db.LongText @map("tiro_script")
+  transcript       String?  @db.LongText
+  qnaData          Json?    @map("qna_data")
+  values           Json?
+  competencies     Json?
+  overall          Json?
+  interviewerNotes Json?    @map("interviewer_notes")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([candidateName])
+  @@index([position])
+  @@index([interviewDate])
+  @@map("interview_reports")
+}

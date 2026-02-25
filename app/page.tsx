@@ -10,7 +10,6 @@ import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { InterviewInfo, EvaluationReport as ReportType, AIEvaluationResponse, InterviewerNotes, QnAData } from '@/lib/types';
-import { saveReport, getReports } from '@/lib/storage';
 
 const EMPTY_NOTES: InterviewerNotes = {
   strengths: '',
@@ -116,15 +115,14 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setSavedReportsCount(getReports().length);
-    const warningShown = localStorage.getItem('storage-warning-shown');
-    if (warningShown) {
-      setShowStorageWarning(false);
-    }
+    fetch('/api/reports')
+      .then(res => res.ok ? res.json() : [])
+      .then((reports: ReportType[]) => setSavedReportsCount(reports.length))
+      .catch(() => {});
+    setShowStorageWarning(false);
   }, []);
 
   const dismissStorageWarning = () => {
-    localStorage.setItem('storage-warning-shown', 'true');
     setShowStorageWarning(false);
   };
 
@@ -296,7 +294,7 @@ export default function Home() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!report) return;
 
     setIsSaving(true);
@@ -305,7 +303,12 @@ export default function Home() {
         ...report,
         updatedAt: new Date().toISOString(),
       };
-      saveReport(updatedReport);
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedReport),
+      });
+      if (!res.ok) throw new Error('저장 실패');
       router.push(`/report/${updatedReport.id}`);
     } catch {
       alert('저장에 실패했습니다. 다시 시도해주세요.');

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronDown, ChevronUp, FolderOpen } from 'lucide-react';
 import ReportList from './ReportList';
+import { EvaluationReport } from '@/lib/types';
 import { getReports, deleteReport, searchReports } from '@/lib/storage';
 
 interface SavedReportsListProps {
