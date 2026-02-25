@@ -18,16 +18,18 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
   const [report, setReport] = useState<ReportType>(initialReport);
 
   const handleNotesChange = async (notes: InterviewerNotes) => {
-    const updated = { ...report, interviewerNotes: notes };
-    setReport(updated);
+    const previous = report;
+    setReport({ ...report, interviewerNotes: notes });
     try {
-      await fetch(`/api/reports/${report.id}`, {
+      const res = await fetch(`/api/reports/${report.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ interviewerNotes: notes }),
       });
+      if (!res.ok) throw new Error('저장 실패');
     } catch {
-      console.error('노트 저장 실패');
+      setReport(previous);
+      alert('소견 저장에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

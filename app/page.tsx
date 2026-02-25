@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
-import { FileText, FolderOpen, Plus, AlertCircle, RefreshCw, AlertTriangle, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { FileText, FolderOpen, Plus, AlertCircle, RefreshCw, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
 import InterviewForm from '@/components/InterviewForm';
 import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
@@ -80,7 +80,6 @@ export default function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedReportsCount, setSavedReportsCount] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [showStorageWarning, setShowStorageWarning] = useState(true);
 
   // 2단계 프로세스 상태
   const [qnaData, setQnaData] = useState<QnAData | null>(null);
@@ -119,12 +118,7 @@ export default function Home() {
       .then(res => res.ok ? res.json() : [])
       .then((reports: ReportType[]) => setSavedReportsCount(reports.length))
       .catch(() => {});
-    setShowStorageWarning(false);
   }, []);
-
-  const dismissStorageWarning = () => {
-    setShowStorageWarning(false);
-  };
 
   // 1단계: Q&A 정리 또는 데모 모드 직행
   const handleSubmit = async (interviewInfo: InterviewInfo) => {
@@ -376,27 +370,6 @@ export default function Home() {
           </Link>
         </div>
       </div>
-
-      {/* localStorage 경고 */}
-      {showStorageWarning && (
-        <div className="glass-card p-4 border-yellow-500/30 bg-yellow-500/10">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-yellow-300 text-sm">
-                <strong>데이터 저장 안내:</strong> 보고서는 브라우저의 로컬 스토리지에 저장됩니다.
-                브라우저 데이터를 삭제하거나 다른 기기/브라우저에서는 데이터에 접근할 수 없습니다.
-              </p>
-            </div>
-            <button
-              onClick={dismissStorageWarning}
-              className="text-yellow-400 hover:text-yellow-300 text-sm shrink-0"
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 메인 콘텐츠: 입력 폼 */}
       {!report && !qnaData && !isAnyLoading && (
