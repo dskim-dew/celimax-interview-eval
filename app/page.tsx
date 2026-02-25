@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
-import { FileText, FolderOpen, Plus, AlertCircle, CheckCircle, RefreshCw, AlertTriangle, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import Link from 'next/link';
+import { FileText, FolderOpen, Plus, AlertCircle, RefreshCw, AlertTriangle, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
 import InterviewForm from '@/components/InterviewForm';
 import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import SavedReportsList from '@/components/SavedReportsList';
 import { InterviewInfo, EvaluationReport as ReportType, AIEvaluationResponse, InterviewerNotes, QnAData } from '@/lib/types';
 import { saveReport, getReports } from '@/lib/storage';
 
@@ -72,14 +73,13 @@ async function consumeSSEStream<T>(
 }
 
 export default function Home() {
+  const router = useRouter();
+
   // 기존 상태
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<ReportType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [showSavedReports, setShowSavedReports] = useState(false);
   const [savedReportsCount, setSavedReportsCount] = useState(0);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [showStorageWarning, setShowStorageWarning] = useState(true);
 
@@ -121,7 +121,7 @@ export default function Home() {
     if (warningShown) {
       setShowStorageWarning(false);
     }
-  }, [refreshTrigger]);
+  }, []);
 
   const dismissStorageWarning = () => {
     localStorage.setItem('storage-warning-shown', 'true');
@@ -136,7 +136,6 @@ export default function Home() {
     }
     setError(null);
     setReport(null);
-    setIsSaved(false);
     setIsDemoMode(false);
     setCurrentInterviewInfo(interviewInfo);
 
@@ -294,7 +293,6 @@ export default function Home() {
   const handleNotesChange = (notes: InterviewerNotes) => {
     if (report) {
       setReport({ ...report, interviewerNotes: notes });
-      setIsSaved(false);
     }
   };
 
@@ -308,35 +306,19 @@ export default function Home() {
         updatedAt: new Date().toISOString(),
       };
       saveReport(updatedReport);
-      setReport(updatedReport);
-      setIsSaved(true);
-      setRefreshTrigger(prev => prev + 1);
+      router.push(`/report/${updatedReport.id}`);
     } catch {
       alert('저장에 실패했습니다. 다시 시도해주세요.');
-    } finally {
       setIsSaving(false);
     }
   };
 
-  const handleLoadReport = (loadedReport: ReportType) => {
-    const migrated = migrateReport(loadedReport);
-    setReport(migrated);
-    setQnaData(migrated.qnaData || null);
-    setCurrentInterviewInfo(migrated.interviewInfo);
-    setShowSavedReports(false);
-    setIsSaved(true);
-    setError(null);
-    setIsDemoMode(false);
-    // Q&A가 있으면 Q&A 탭, 없으면 평가표 탭
-    setActiveTab(migrated.qnaData ? 'qna' : 'evaluation');
-  };
 
   // Q&A 없이 바로 평가 (빠른 모드)
   const handleDirectSubmit = async (interviewInfo: InterviewInfo) => {
     setError(null);
     setReport(null);
     setQnaData(null);
-    setIsSaved(false);
     setIsDemoMode(false);
     setCurrentInterviewInfo(interviewInfo);
     await generateEvaluationDirect(interviewInfo);
@@ -346,7 +328,6 @@ export default function Home() {
     setReport(null);
     setQnaData(null);
     setCurrentInterviewInfo(null);
-    setIsSaved(false);
     setError(null);
     setIsDemoMode(false);
     setActiveTab('qna');
@@ -366,8 +347,8 @@ export default function Home() {
             <FileText className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold gradient-text">면접 평가 자동화 시스템</h1>
-            <p className="text-sm text-slate-400">AI 기반 면접 평가 보고서 생성</p>
+            <h1 className="text-2xl font-bold gradient-text">Celimax 면접 리포트 생성</h1>
+            <p className="text-sm text-slate-400">AI 기반 면접 보고서 생성</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -380,20 +361,16 @@ export default function Home() {
               새 보고서 작성
             </button>
           )}
-          <button
-            onClick={() => setShowSavedReports(!showSavedReports)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-              showSavedReports
-                ? 'bg-purple-600 text-white'
-                : 'glass-button text-white hover:scale-105'
-            }`}
+          <Link
+            href="/history"
+            className="flex items-center gap-2 px-4 py-2 glass-button text-white rounded-lg hover:scale-105 transition-transform"
           >
             <FolderOpen className="w-4 h-4" />
             저장된 보고서
             <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/20">
               {savedReportsCount}개
             </span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -417,14 +394,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* 저장된 보고서 목록 */}
-      <SavedReportsList
-        isOpen={showSavedReports}
-        onToggle={() => setShowSavedReports(!showSavedReports)}
-        onLoad={handleLoadReport}
-        refreshTrigger={refreshTrigger}
-      />
 
       {/* 메인 콘텐츠: 입력 폼 */}
       {!report && !qnaData && !isAnyLoading && (
@@ -565,15 +534,6 @@ export default function Home() {
                   isSaving={isSaving}
                 />
 
-                {isSaved && (
-                  <div className="mt-6 p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/30 flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">
-                      보고서가 저장되었습니다.
-                    </span>
-                  </div>
-                )}
-
                 {/* Q&A로 돌아가기 버튼 */}
                 {qnaData && (
                   <div className="mt-6 p-4 bg-purple-500/10 rounded-lg border border-purple-400/30">
@@ -606,14 +566,6 @@ export default function Home() {
             isSaving={isSaving}
           />
 
-          {isSaved && (
-            <div className="glass-card p-4 border-emerald-500/30 bg-emerald-500/10 flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">
-                보고서가 저장되었습니다.
-              </span>
-            </div>
-          )}
         </div>
       )}
     </div>

@@ -91,11 +91,15 @@ export interface QnAData {
   metadata: QnAMetadata;
 }
 
+// 최종 의견 선택값
+export type FinalDecision = 'drop' | 'weak-go' | 'strong-go' | null;
+
 // 면접관 추가 소견 (구조화)
 export interface InterviewerNotes {
-  strengths: string;      // 강점, 함께하고 싶은 이유
-  concerns: string;       // 우려되는 부분
-  validation: string;     // 추가 검증 필요
+  strengths: string;            // 강점, 함께하고 싶은 이유
+  concerns: string;             // 우려되는 부분
+  validation: string;           // 추가 검증 필요
+  finalDecision?: FinalDecision; // 최종 의견
 }
 
 // 전체 평가 보고서

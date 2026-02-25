@@ -1,9 +1,10 @@
 import { InterviewInfo, QnAData } from './types';
 import { truncateToTokenLimit } from './ai-client';
 
-// 프롬프트 구성 요소 토큰 예산 (~1500토큰) 고려, 스크립트는 최대 ~3500토큰
-// (출력 토큰 한도 4000 + 입력 한도 10000/분 대응)
+// 평가 프롬프트용 스크립트 토큰 예산
 const MAX_SCRIPT_TOKENS = 3500;
+// Q&A 정리용 스크립트 토큰 예산 (전체 질문 보존을 위해 평가 프롬프트보다 넉넉하게)
+const MAX_QNA_SCRIPT_TOKENS = 5000;
 
 const CRITERIA = `**가치관 평가 (1-5점):**
 - honest(솔직): 5=실패/약점 구체적 인정+학습 설명 4=실패 공유하나 학습 일반적 3=어려운 부분 회피/모호 2=긍정면만 강조 1=과장/사실과 다름
@@ -89,28 +90,30 @@ ${OUTPUT_SCHEMA}`;
 
 // Q&A 정리 프롬프트
 export function buildQnAPrompt(tiroScript: string): string {
-  return `다음 면접 스크립트를 Q&A 형식으로 깔끔하게 정리해주세요.
+  const { text: scriptText, truncated } = truncateToTokenLimit(tiroScript, MAX_QNA_SCRIPT_TOKENS);
+  return `다음 면접 스크립트를 Q&A 형식으로 정리해주세요.
 
 **스크립트:**
 ━━━━━━━━━━━━━━━━━━━━
-${truncateToTokenLimit(tiroScript, MAX_SCRIPT_TOKENS).text}
-━━━━━━━━━━━━━━━━━━━━
+${scriptText}
+━━━━━━━━━━━━━━━━━━━━${truncated ? '\n(스크립트가 길어 일부 생략됨)' : ''}
 
 **정리 규칙:**
 - 면접관의 질문과 지원자의 답변을 명확히 구분
 - 추임새(음, 어, 네 등) 제거, 불완전한 문장은 완성
-- 중복/불필요한 대화 생략, 시간 순서 정리
-- 꼬리질문은 별도 Q&A로 분리
-- **답변은 핵심 내용만 2-4문장으로 요약** (원문 그대로 옮기지 말 것)
-- **최대 15개 Q&A까지만 정리** (가장 중요한 질문 위주)
+- 스크립트에 등장하는 **모든 질문을 빠짐없이** 포함 (중요도와 무관하게 전부)
+- 꼬리질문도 별도 Q&A로 분리
+- 질문은 원문 의도를 그대로 유지
+- **답변은 핵심 내용 + 주요 사례 포함하여 2-4문장으로 요약** (과도한 축약 지양)
+- **출력이 길어질 경우 미완성 JSON을 출력하지 말고, 현재까지 완성된 Q&A만으로 JSON 배열을 닫고 metadata까지 반드시 출력** (불완전한 JSON 절대 금지)
 
 **출력: JSON만, {로 시작 }로 끝, 코드블록/설명문 없이.**
 {
   "qna": [
     {
       "id": 1,
-      "question": "질문 요약",
-      "answer": "답변 핵심 2-4문장",
+      "question": "질문 원문 (추임새만 제거)",
+      "answer": "답변 요약 2-4문장",
       "topic": "주제"
     }
   ],

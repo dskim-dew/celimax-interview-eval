@@ -3,17 +3,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronDown, ChevronUp, FolderOpen } from 'lucide-react';
 import ReportList from './ReportList';
-import { EvaluationReport } from '@/lib/types';
 import { getReports, deleteReport, searchReports } from '@/lib/storage';
 
 interface SavedReportsListProps {
   isOpen: boolean;
   onToggle: () => void;
-  onLoad: (report: EvaluationReport) => void;
   refreshTrigger?: number;
 }
 
-export default function SavedReportsList({ isOpen, onToggle, onLoad, refreshTrigger }: SavedReportsListProps) {
+export default function SavedReportsList({ isOpen, onToggle, refreshTrigger }: SavedReportsListProps) {
   const [reports, setReports] = useState<EvaluationReport[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalCount, setTotalCount] = useState(0);
@@ -86,7 +84,6 @@ export default function SavedReportsList({ isOpen, onToggle, onLoad, refreshTrig
             <ReportList
               reports={reports}
               onDelete={handleDelete}
-              onLoad={onLoad}
             />
           </div>
         </div>

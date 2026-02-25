@@ -86,6 +86,16 @@ export function cleanAIResponse(rawText: string): string {
     candidate = candidate.replace(/,\s*$/gm, '');
     candidate = candidate.replace(/,\s*([}\]])/g, '$1');
 
+    // 열린 문자열 닫기: 따옴표 수가 홀수면 마지막 따옴표 이전까지 자르고 닫기
+    const lastQ = candidate.lastIndexOf('"');
+    if (lastQ !== -1) {
+      const quoteCount = (candidate.substring(0, lastQ + 1).match(/"/g) || []).length;
+      if (quoteCount % 2 !== 0) {
+        candidate = candidate.substring(0, lastQ) + '"';
+        candidate = candidate.replace(/,\s*([}\]])/g, '$1');
+      }
+    }
+
     // 열린 브래킷/브레이스 카운트해서 닫기
     const openBraces = (candidate.match(/{/g) || []).length;
     const closeBraces = (candidate.match(/}/g) || []).length;

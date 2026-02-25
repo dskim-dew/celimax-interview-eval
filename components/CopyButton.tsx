@@ -1,38 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, ChevronDown, Table, FileText, MessageSquare, Check } from 'lucide-react';
+import { Copy, ChevronDown, MessageSquare, Link2, Check } from 'lucide-react';
 import { EvaluationReport } from '@/lib/types';
-import { formatForMondayTable, formatForText, formatForSummary } from '@/lib/formatters';
+import { formatForShareSummary } from '@/lib/formatters';
 
 interface CopyButtonProps {
   report: EvaluationReport;
 }
 
-type CopyFormat = 'table' | 'text' | 'summary';
+type CopyFormat = 'summary' | 'link';
 
 export default function CopyButton({ report }: CopyButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<CopyFormat | null>(null);
 
+  const getReportUrl = () => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/report/${report.id}`;
+    }
+    return `/report/${report.id}`;
+  };
+
   const handleCopy = async (format: CopyFormat) => {
     let content = '';
 
     switch (format) {
-      case 'table':
-        content = formatForMondayTable(report);
-        break;
-      case 'text':
-        content = formatForText(report);
-        break;
       case 'summary':
-        content = formatForSummary(report);
+        content = formatForShareSummary(report, getReportUrl());
+        break;
+      case 'link':
+        content = getReportUrl();
         break;
     }
 
     try {
       await navigator.clipboard.writeText(content);
       setCopiedFormat(format);
+      setIsOpen(false);
       setTimeout(() => setCopiedFormat(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
@@ -44,10 +49,10 @@ export default function CopyButton({ report }: CopyButtonProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-500 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-purple-500/20"
+        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-purple-500/20"
       >
-        <Copy className="w-4 h-4" />
-        먼데이용 복사
+        <Copy className="w-5 h-5" />
+        공유
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -59,52 +64,36 @@ export default function CopyButton({ report }: CopyButtonProps) {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute top-full mt-2 right-0 w-72 glass-card z-20 overflow-hidden">
+          <div className="absolute bottom-full mb-2 right-0 w-64 glass-card z-20 overflow-hidden">
             <div className="p-2">
               <button
-                onClick={() => handleCopy('table')}
-                className="w-full flex items-center justify-between px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <Table className="w-5 h-5 text-blue-400" />
-                  <div>
-                    <div className="font-medium text-white">표 형식</div>
-                    <div className="text-xs text-slate-400">먼데이 붙여넣기 시 자동 표 변환</div>
-                  </div>
-                </div>
-                {copiedFormat === 'table' && (
-                  <Check className="w-5 h-5 text-emerald-400" />
-                )}
-              </button>
-
-              <button
-                onClick={() => handleCopy('text')}
-                className="w-full flex items-center justify-between px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-purple-400" />
-                  <div>
-                    <div className="font-medium text-white">텍스트 형식</div>
-                    <div className="text-xs text-slate-400">가독성 좋은 전체 내용</div>
-                  </div>
-                </div>
-                {copiedFormat === 'text' && (
-                  <Check className="w-5 h-5 text-emerald-400" />
-                )}
-              </button>
-
-              <button
                 onClick={() => handleCopy('summary')}
-                className="w-full flex items-center justify-between px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-colors group"
+                className="w-full flex items-center justify-between px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-5 h-5 text-cyan-400" />
                   <div>
                     <div className="font-medium text-white">요약 형식</div>
-                    <div className="text-xs text-slate-400">슬랙/메시지 공유용</div>
+                    <div className="text-xs text-slate-400">기본정보·평가 요약·링크 포함</div>
                   </div>
                 </div>
                 {copiedFormat === 'summary' && (
+                  <Check className="w-5 h-5 text-emerald-400" />
+                )}
+              </button>
+
+              <button
+                onClick={() => handleCopy('link')}
+                className="w-full flex items-center justify-between px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Link2 className="w-5 h-5 text-blue-400" />
+                  <div>
+                    <div className="font-medium text-white">보고서 링크</div>
+                    <div className="text-xs text-slate-400">보고서 URL만 복사</div>
+                  </div>
+                </div>
+                {copiedFormat === 'link' && (
                   <Check className="w-5 h-5 text-emerald-400" />
                 )}
               </button>

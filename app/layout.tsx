@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "면접 평가 자동화 시스템",
-  description: "AI 기반 면접 평가 자동화 시스템",
+  title: "Celimax 면접 리포트 생성",
+  description: "AI 기반 면접 보고서 생성",
 };
 
 export default function RootLayout({

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const stream = createSSEStream(prompt, {
       model: 'claude-haiku-4-5-20251001',
-      maxTokens: 4096,
+      maxTokens: 5000,
       temperature: 0.2,
       maxRetries: 3,
     });

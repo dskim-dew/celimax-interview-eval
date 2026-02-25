@@ -214,7 +214,7 @@ export function formatForText(report: EvaluationReport): string {
   return lines.join('\n');
 }
 
-// 간단한 요약 형식 (슬랙/메시지용)
+// 간단한 요약 형식 (슬랙/메시지용) - 하위 호환용
 export function formatForSummary(report: EvaluationReport): string {
   const valueScores = Object.values(report.values).map(v => v.score);
   const avgScore = (valueScores.reduce((a, b) => a + b, 0) / valueScores.length).toFixed(1);
@@ -226,4 +226,65 @@ export function formatForSummary(report: EvaluationReport): string {
 핵심 가치 평균: ${avgScore}점
 강점: ${report.overall.strengths.slice(0, 2).join(', ')}
 리스크: ${report.overall.risks.slice(0, 2).join(', ')}`;
+}
+
+// 공유용 요약 형식 (기본정보 + 종합평가 + 항목별 요약 + 면접관 소견 + 링크)
+export function formatForShareSummary(report: EvaluationReport, reportUrl?: string): string {
+  const valueScores = Object.values(report.values).map(v => v.score);
+  const avgScore = (valueScores.reduce((a, b) => a + b, 0) / valueScores.length).toFixed(1);
+
+  const { position, interviewRound, candidateName, interviewDate, interviewerName } = report.interviewInfo;
+  const roundLabel = interviewRound ?? '';
+  const formattedDate = interviewDate.replace(/-/g, '.');
+
+  const lines: string[] = [];
+
+  // 제목
+  const titlePrefix = roundLabel ? `[${roundLabel} 인터뷰]` : '[인터뷰]';
+  const titleSuffix = roundLabel ? `${position} ${roundLabel}` : position;
+  lines.push(`${titlePrefix} ${titleSuffix} - ${candidateName} 님 (${formattedDate})`);
+  lines.push('');
+
+  // 보고서 링크
+  if (reportUrl) {
+    lines.push(`보고서 링크: ${reportUrl}`);
+    lines.push('');
+  }
+
+  // 면접관 소견
+  const notes = report.interviewerNotes;
+  const decisionLabel: Record<string, string> = { drop: '드랍', 'weak-go': 'Weak Go', 'strong-go': 'Strong Go' };
+  if (notes.strengths || notes.concerns || notes.validation || notes.finalDecision) {
+    lines.push('▸ 면접관 소견');
+    if (notes.finalDecision) {
+      lines.push(`  • 최종 의견: ${decisionLabel[notes.finalDecision]}`);
+    }
+    if (notes.strengths) {
+      lines.push(`  • 강점: ${notes.strengths}`);
+    }
+    if (notes.concerns) {
+      lines.push(`  • 우려사항: ${notes.concerns}`);
+    }
+    if (notes.validation) {
+      lines.push(`  • 추가 검증: ${notes.validation}`);
+    }
+    lines.push('');
+  }
+
+  // 직무 역량 평가 요약
+  lines.push('▸ 직무 역량');
+  for (const [key, name] of Object.entries(COMPETENCY_NAMES)) {
+    const comp = report.competencies[key as keyof CompetenciesEvaluation];
+    lines.push(`  • ${name} [${comp.level}] — ${comp.summary}`);
+  }
+  lines.push('');
+
+  // 핵심 가치 평가 요약
+  lines.push(`▸ 핵심 가치 (평균 ${avgScore}점)`);
+  for (const [key, name] of Object.entries(VALUE_NAMES)) {
+    const value = report.values[key as keyof ValuesEvaluation];
+    lines.push(`  • ${name} ${value.score}점 — ${value.summary}`);
+  }
+
+  return lines.join('\n');
 }

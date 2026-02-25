@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Edit, X, Loader2, FileQuestion, Clock } from 'lucide-react';
+import { ArrowLeft, Loader2, FileQuestion, Clock, User, Briefcase, Users, Calendar, Hash, PenLine } from 'lucide-react';
 import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
+import CopyButton from '@/components/CopyButton';
 import { EvaluationReport as ReportType, InterviewerNotes } from '@/lib/types';
 import { getReportById, updateReport } from '@/lib/storage';
 
-// 기존 형식 마이그레이션 (interviewerComment -> interviewerNotes, tiroLink -> tiroScript)
 function migrateReport(report: ReportType): ReportType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = report as any;
@@ -45,8 +45,6 @@ export default function ReportDetailPage() {
   const router = useRouter();
   const [report, setReport] = useState<ReportType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const id = params.id as string;
@@ -59,26 +57,9 @@ export default function ReportDetailPage() {
 
   const handleNotesChange = (notes: InterviewerNotes) => {
     if (report) {
-      setReport({ ...report, interviewerNotes: notes });
-    }
-  };
-
-  const handleSave = () => {
-    if (!report) return;
-
-    setIsSaving(true);
-    try {
-      const updatedReport = updateReport(report.id, {
-        interviewerNotes: report.interviewerNotes,
-      });
-      if (updatedReport) {
-        setReport(migrateReport(updatedReport));
-        setIsEditing(false);
-      }
-    } catch {
-      alert('저장에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsSaving(false);
+      const updated = { ...report, interviewerNotes: notes };
+      setReport(updated);
+      updateReport(report.id, { interviewerNotes: notes });
     }
   };
 
@@ -110,7 +91,7 @@ export default function ReportDetailPage() {
   return (
     <div className="space-y-6">
       {/* 상단 네비게이션 */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 px-4 py-2 glass-button rounded-lg text-white hover:scale-105 transition-transform"
@@ -118,29 +99,52 @@ export default function ReportDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           뒤로 가기
         </button>
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-            isEditing
-              ? 'bg-slate-600/50 text-slate-300 hover:bg-slate-600/70 border border-slate-500/30'
-              : 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30'
-          }`}
-        >
-          {isEditing ? (
-            <>
-              <X className="w-4 h-4" />
-              편집 취소
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4" />
-              편집 모드
-            </>
-          )}
-        </button>
       </div>
 
-      {/* Q&A 섹션 */}
+      {/* 1. 면접 평가 보고서 기본 정보 */}
+      <div className="glass-card p-6">
+        <h1 className="text-2xl font-bold gradient-text mb-4">
+          {report.interviewInfo.interviewRound
+            ? `[${report.interviewInfo.interviewRound} 인터뷰] ${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님`
+            : `[인터뷰] ${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님`}
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <p className="flex items-center gap-2">
+            <User className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-300">지원자:</span>
+            <span className="font-medium text-white">{report.interviewInfo.candidateName}</span>
+          </p>
+          <p className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-300">포지션:</span>
+            <span className="font-medium text-white">{report.interviewInfo.position}</span>
+          </p>
+          <p className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-300">면접관:</span>
+            <span className="font-medium text-white">{report.interviewInfo.interviewerName}</span>
+          </p>
+          <p className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-300">면접일:</span>
+            <span className="font-medium text-white">{report.interviewInfo.interviewDate}</span>
+          </p>
+          <p className="flex items-center gap-2">
+            <Hash className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-300">인터뷰 차수:</span>
+            <span className="font-medium text-white">{report.interviewInfo.interviewRound ?? '-'}</span>
+          </p>
+          {report.interviewInfo.reportAuthor && (
+            <p className="flex items-center gap-2">
+              <PenLine className="w-4 h-4 text-purple-400" />
+              <span className="text-slate-300">작성자:</span>
+              <span className="font-medium text-white">{report.interviewInfo.reportAuthor}</span>
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Q&A 섹션 */}
       {report.qnaData && (
         <QnASection
           qnaData={report.qnaData}
@@ -150,14 +154,18 @@ export default function ReportDetailPage() {
         />
       )}
 
-      {/* 보고서 내용 */}
+      {/* 3. 평가표 (헤더 제외) */}
       <EvaluationReport
         report={report}
         onNotesChange={handleNotesChange}
-        onSave={handleSave}
-        isSaving={isSaving}
-        readOnly={!isEditing}
+        readOnly={true}
+        hideHeader={true}
       />
+
+      {/* 4. 공유 버튼 */}
+      <div className="flex justify-center pt-2 pb-4">
+        <CopyButton report={report} />
+      </div>
 
       {/* 메타 정보 */}
       <div className="flex items-center justify-center gap-6 text-sm text-slate-500">

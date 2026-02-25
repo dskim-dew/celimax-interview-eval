@@ -1,13 +1,14 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
-import { InterviewerNotes } from '@/lib/types';
+import { InterviewerNotes, FinalDecision } from '@/lib/types';
 import Linkify from './Linkify';
 
 interface InterviewerCommentProps {
   notes: InterviewerNotes;
   onChange: (notes: InterviewerNotes) => void;
   readOnly?: boolean;
+  finalDecisionReadOnly?: boolean;
 }
 
 function handleMarkdownKeyDown(
@@ -29,7 +30,6 @@ function handleMarkdownKeyDown(
   e.preventDefault();
   const prefix = bulletMatch[1];
 
-  // 불렛만 있고 내용이 없으면 불렛 제거
   if (currentLine.trimEnd() === '-' || currentLine === prefix) {
     const newValue = value.substring(0, lineStart) + '\n' + value.substring(selectionStart);
     onChange({ ...notes, [field]: newValue });
@@ -39,7 +39,6 @@ function handleMarkdownKeyDown(
     return;
   }
 
-  // 새 줄에 불렛 자동 추가
   const newValue = value.substring(0, selectionStart) + '\n' + prefix + value.substring(selectionStart);
   onChange({ ...notes, [field]: newValue });
   setTimeout(() => {
@@ -47,58 +46,78 @@ function handleMarkdownKeyDown(
   }, 0);
 }
 
-export default function InterviewerComment({ notes, onChange, readOnly = false }: InterviewerCommentProps) {
+const DECISIONS: { value: FinalDecision; label: string; activeClass: string; dimClass: string }[] = [
+  {
+    value: 'drop',
+    label: '드랍',
+    activeClass: 'bg-red-500 text-white border-red-400 shadow-lg shadow-red-500/30',
+    dimClass: 'bg-red-500/10 text-red-400/30 border-red-500/15',
+  },
+  {
+    value: 'weak-go',
+    label: 'Weak Go',
+    activeClass: 'bg-amber-400 text-slate-900 border-amber-300 shadow-lg shadow-amber-400/30',
+    dimClass: 'bg-amber-400/10 text-amber-400/30 border-amber-400/15',
+  },
+  {
+    value: 'strong-go',
+    label: 'Strong Go',
+    activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/30',
+    dimClass: 'bg-emerald-500/10 text-emerald-400/30 border-emerald-500/15',
+  },
+];
+
+export default function InterviewerComment({ notes, onChange, readOnly = false, finalDecisionReadOnly = false }: InterviewerCommentProps) {
+  const selected = notes.finalDecision ?? null;
+
   return (
     <div className="glass-card overflow-hidden">
       <div className="bg-gradient-to-r from-slate-800/80 to-blue-900/30 p-4 border-b border-white/10">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-blue-400" />
-          면접관 추가 소견
+          면접관 소견
         </h2>
       </div>
-      <div className="p-4">
+
+      <div className="p-4 space-y-4">
         {readOnly ? (
-          <div className="space-y-6">
+          <>
             {/* 강점 */}
-            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-emerald-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">💪</span>
-                지원자의 강점, 함께하고 싶은 이유
+            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+                <span>💪</span> 지원자의 강점, 함께하고 싶은 이유
               </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[60px] bg-white/5 p-4 rounded-lg border border-emerald-400/20">
+              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-emerald-400/20 text-sm">
                 <Linkify>{notes.strengths || '작성된 내용이 없습니다.'}</Linkify>
               </div>
             </div>
 
             {/* 우려사항 */}
-            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-amber-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                우려되는 부분
+            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-amber-300 mb-2 flex items-center gap-2">
+                <span>⚠️</span> 우려되는 부분
               </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[60px] bg-white/5 p-4 rounded-lg border border-amber-400/20">
+              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-amber-400/20 text-sm">
                 <Linkify>{notes.concerns || '작성된 내용이 없습니다.'}</Linkify>
               </div>
             </div>
 
             {/* 추가 검증 */}
-            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">🔍</span>
-                추가 검증이 필요한 부분
+            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-blue-300 mb-2 flex items-center gap-2">
+                <span>🔍</span> 추가 검증이 필요한 부분
               </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[60px] bg-white/5 p-4 rounded-lg border border-blue-400/20">
+              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-blue-400/20 text-sm">
                 <Linkify>{notes.validation || '작성된 내용이 없습니다.'}</Linkify>
               </div>
             </div>
-          </div>
+          </>
         ) : (
-          <div className="space-y-6">
-            {/* 1. 지원자의 강점 */}
-            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-emerald-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">💪</span>
-                지원자의 강점, 함께하고 싶은 이유
+          <>
+            {/* 1. 강점 */}
+            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+                <span>💪</span> 지원자의 강점, 함께하고 싶은 이유
               </h3>
               <textarea
                 value={notes.strengths}
@@ -106,15 +125,14 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
                 onKeyDown={(e) => handleMarkdownKeyDown(e, 'strengths', notes, onChange)}
                 placeholder="이 지원자와 함께 일하고 싶은 이유, 기대되는 점을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-emerald-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition resize-none"
+                className="w-full px-4 py-3 bg-white/10 border border-emerald-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition resize-none text-sm"
               />
             </div>
 
-            {/* 2. 우려되는 부분 */}
-            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-amber-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                우려되는 부분
+            {/* 2. 우려사항 */}
+            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-amber-300 mb-2 flex items-center gap-2">
+                <span>⚠️</span> 우려되는 부분
               </h3>
               <textarea
                 value={notes.concerns}
@@ -122,15 +140,14 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
                 onKeyDown={(e) => handleMarkdownKeyDown(e, 'concerns', notes, onChange)}
                 placeholder="채용 시 우려되는 점, 리스크 요인을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-amber-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-none"
+                className="w-full px-4 py-3 bg-white/10 border border-amber-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-none text-sm"
               />
             </div>
 
-            {/* 3. 추가 검증 필요 */}
-            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center gap-2">
-                <span className="text-xl">🔍</span>
-                추가 검증이 필요한 부분
+            {/* 3. 추가 검증 */}
+            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-5">
+              <h3 className="text-base font-semibold text-blue-300 mb-2 flex items-center gap-2">
+                <span>🔍</span> 추가 검증이 필요한 부분
               </h3>
               <textarea
                 value={notes.validation}
@@ -138,11 +155,47 @@ export default function InterviewerComment({ notes, onChange, readOnly = false }
                 onKeyDown={(e) => handleMarkdownKeyDown(e, 'validation', notes, onChange)}
                 placeholder="2차 면접이나 레퍼런스 체크에서 확인이 필요한 부분을 작성해주세요... (- 입력 시 불렛 목록)"
                 rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-blue-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none"
+                className="w-full px-4 py-3 bg-white/10 border border-blue-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none text-sm"
               />
             </div>
-          </div>
+          </>
         )}
+
+        {/* 최종 의견 선택 */}
+        <div className="pt-2">
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-base font-semibold text-white">최종 의견</h3>
+            {!selected && !readOnly && (
+              <span className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">필수</span>
+            )}
+            {selected && (
+              <span className="text-xs text-slate-400">선택됨</span>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {DECISIONS.map(({ value, label, activeClass, dimClass }) => {
+              const isSelected = selected === value;
+              const isDimmed = selected !== null && !isSelected;
+
+              return (
+                <button
+                  key={value}
+                  onClick={() => !readOnly && !finalDecisionReadOnly && onChange({ ...notes, finalDecision: isSelected ? null : value })}
+                  disabled={readOnly || finalDecisionReadOnly}
+                  className={`py-3 rounded-xl font-bold text-sm border-2 transition-all duration-200 ${
+                    isSelected
+                      ? activeClass
+                      : isDimmed
+                        ? dimClass
+                        : 'bg-white/5 text-slate-300 border-white/15 hover:bg-white/10 hover:border-white/25'
+                  } ${readOnly || finalDecisionReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
