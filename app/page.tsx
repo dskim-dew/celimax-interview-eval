@@ -461,7 +461,7 @@ export default function Home() {
                 onClick={() => setActiveTab('qna')}
                 className={`flex-1 sm:flex-none px-6 py-4 font-semibold transition-all duration-200 ${
                   activeTab === 'qna'
-                    ? 'text-white border-b-2 border-lime-400 bg-lime-600/10'
+                    ? 'text-white border-b-2 border-emerald-400 bg-emerald-600/10'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
                 }`}
               >
@@ -523,11 +523,11 @@ export default function Home() {
 
                 {/* Q&A로 돌아가기 버튼 */}
                 {qnaData && (
-                  <div className="mt-6 p-4 bg-lime-600/10 rounded-lg border border-lime-400/30">
-                    <p className="text-lime-300 mb-3 text-sm">원본 면접 Q&A를 다시 확인하고 싶으신가요?</p>
+                  <div className="mt-6 p-4 bg-emerald-600/10 rounded-lg border border-emerald-400/30">
+                    <p className="text-emerald-300 mb-3 text-sm">원본 면접 Q&A를 다시 확인하고 싶으신가요?</p>
                     <button
                       onClick={() => setActiveTab('qna')}
-                      className="px-6 py-3 bg-lime-600 hover:bg-green-600 text-white rounded-lg transition flex items-center gap-2"
+                      className="px-6 py-3 bg-emerald-600 hover:bg-green-600 text-white rounded-lg transition flex items-center gap-2"
                     >
                       <MessageSquare className="w-5 h-5" />
                       Q&A 보기

@@ -40,12 +40,12 @@ body {
   }
 
   .glass-input {
-    @apply bg-[#0d1f14]/50 backdrop-blur-sm border border-emerald-800/40 text-white placeholder-slate-400 focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 rounded-lg;
+    @apply bg-[#0d1f14]/50 backdrop-blur-sm border border-emerald-800/40 text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-lg;
   }
 
   /* 그라데이션 텍스트 */
   .gradient-text {
-    @apply bg-gradient-to-r from-lime-400 via-emerald-400 to-green-300 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent;
   }
 
   /* 레벨별 배지 색상 */
@@ -71,7 +71,7 @@ body {
   }
 
   .score-4 {
-    @apply bg-lime-500 text-slate-900;
+    @apply bg-emerald-500 text-slate-900;
   }
 
   .score-3 {

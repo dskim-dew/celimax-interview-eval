@@ -73,7 +73,7 @@ export default function EvaluationReport({
             </p>
             {report.interviewInfo.reportAuthor && (
               <p className="flex items-center gap-2">
-                <PenLine className="w-4 h-4 text-lime-400" />
+                <PenLine className="w-4 h-4 text-emerald-400" />
                 <span className="text-slate-300">작성자:</span>
                 <span className="font-medium text-white">{report.interviewInfo.reportAuthor}</span>
               </p>
@@ -93,7 +93,7 @@ export default function EvaluationReport({
         className={`rounded-2xl bg-emerald-500/5 border border-emerald-500/10 p-6${sectionIds.competency ? ' scroll-mt-8' : ''}`}
       >
         <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
-          <Target className="w-5 h-5 text-lime-400" />
+          <Target className="w-5 h-5 text-emerald-400" />
           직무 역량 분석
         </h2>
         <div className="space-y-4">
@@ -110,7 +110,7 @@ export default function EvaluationReport({
       {/* 핵심 가치 섹션 */}
       <div
         id={sectionIds.values}
-        className={`rounded-2xl bg-lime-500/5 border border-lime-500/10 p-6${sectionIds.values ? ' scroll-mt-8' : ''}`}
+        className={`rounded-2xl bg-emerald-500/5 border border-emerald-500/10 p-6${sectionIds.values ? ' scroll-mt-8' : ''}`}
       >
         <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
           <Star className="w-5 h-5 text-emerald-400" />

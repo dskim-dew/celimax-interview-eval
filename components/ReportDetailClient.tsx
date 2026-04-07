@@ -103,7 +103,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
             </p>
             {report.interviewInfo.reportAuthor && (
               <p className="flex items-center gap-2">
-                <PenLine className="w-4 h-4 text-lime-400" />
+                <PenLine className="w-4 h-4 text-emerald-400" />
                 <span className="text-slate-300">작성자:</span>
                 <span className="font-medium text-white">{report.interviewInfo.reportAuthor}</span>
               </p>

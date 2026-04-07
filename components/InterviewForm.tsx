@@ -204,7 +204,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="reportAuthor" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <User className="w-4 h-4 text-lime-400" />
+              <User className="w-4 h-4 text-emerald-400" />
               리포트 작성자 *
             </span>
           </label>
@@ -306,7 +306,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
       <div className="mb-6">
         <label htmlFor="tiroScript" className="block text-sm font-medium text-slate-300 mb-2">
           <span className="flex items-center gap-2">
-            <ClipboardPaste className="w-4 h-4 text-lime-400" />
+            <ClipboardPaste className="w-4 h-4 text-emerald-400" />
             Tiro 면접 스크립트
           </span>
         </label>

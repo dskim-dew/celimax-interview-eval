@@ -22,7 +22,7 @@ export default function CompetencyCard({ name, evaluation }: CompetencyCardProps
       <div className="space-y-3 border-t border-emerald-500/10 pt-3">
         {specificCase && (
           <div>
-            <h4 className="text-xs font-medium text-lime-400 mb-1.5 flex items-center gap-1.5">
+            <h4 className="text-xs font-medium text-emerald-400 mb-1.5 flex items-center gap-1.5">
               <CheckCircle className="w-3.5 h-3.5" />
               근거 사례
             </h4>

@@ -29,7 +29,7 @@ export default function QnASection({
   return (
     <div className="space-y-4">
       {/* 메타 정보 */}
-      <div className="flex flex-wrap gap-4 text-sm text-slate-300 p-3 bg-lime-600/10 rounded-lg border border-lime-400/30">
+      <div className="flex flex-wrap gap-4 text-sm text-slate-300 p-3 bg-emerald-600/10 rounded-lg border border-emerald-400/30">
         <span>총 질문: {qnaData.metadata.totalQuestions}개</span>
         <span>주요 주제: {qnaData.metadata.mainTopics.join(', ')}</span>
       </div>
@@ -40,7 +40,7 @@ export default function QnASection({
           onClick={() => setTopicFilter(null)}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
             !topicFilter
-              ? 'bg-lime-600/30 text-lime-300 border border-lime-400/40'
+              ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-400/40'
               : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
           }`}
         >
@@ -54,7 +54,7 @@ export default function QnASection({
               onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 topicFilter === topic
-                  ? 'bg-lime-600/30 text-lime-300 border border-lime-400/40'
+                  ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-400/40'
                   : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
               }`}
             >
@@ -71,7 +71,7 @@ export default function QnASection({
             key={item.id}
             className="bg-white/5 rounded-lg p-5 border border-white/10"
           >
-            <span className="inline-block px-3 py-1 bg-lime-600/20 text-lime-300 text-xs rounded-full mb-3">
+            <span className="inline-block px-3 py-1 bg-emerald-600/20 text-emerald-300 text-xs rounded-full mb-3">
               {item.topic}
             </span>
 
@@ -79,7 +79,7 @@ export default function QnASection({
               <p className="text-sm text-emerald-300 mb-1 font-medium">
                 Q{item.id}. 면접관
               </p>
-              <p className="text-white pl-4 border-l-2 border-emerald-400">
+              <p className="text-white pl-4 border-l-2 border-emerald-500">
                 <Linkify>{item.question}</Linkify>
               </p>
             </div>

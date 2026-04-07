@@ -161,7 +161,7 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
               onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
               placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
               rows={5}
-              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition resize-none text-sm font-mono"
+              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition resize-none text-sm font-mono"
             />
           </div>
         )}

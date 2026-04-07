@@ -31,7 +31,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
             {/* 정보 영역 */}
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-bold text-white leading-snug truncate mb-1.5">
-                <span className="text-lime-300">
+                <span className="text-emerald-300">
                   [{report.interviewInfo.interviewRound
                     ? `${report.interviewInfo.interviewRound} 인터뷰`
                     : '인터뷰'}]
@@ -47,7 +47,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
                   {report.interviewInfo.interviewerName}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-lime-400" />
+                  <Calendar className="w-3.5 h-3.5 text-emerald-400" />
                   {report.interviewInfo.interviewDate}
                 </span>
               </div>

@@ -71,7 +71,7 @@ export default function ReportTOC({ items }: ReportTOCProps) {
                   onClick={() => handleClick(id)}
                   className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
                     isActive
-                      ? 'text-white bg-white/10 border-l-2 border-lime-400 font-medium'
+                      ? 'text-white bg-white/10 border-l-2 border-emerald-500 font-medium'
                       : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border-l-2 border-transparent'
                   }`}
                 >
