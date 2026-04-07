@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema=prisma/schema.supabase.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
+    "db:generate:prod": "prisma generate --schema=prisma/schema.mysql.prisma",
+    "db:generate:supabase": "prisma generate --schema=prisma/schema.supabase.prisma",
+    "db:push:supabase": "prisma db push --schema=prisma/schema.supabase.prisma",
+    "db:migrate": "prisma migrate deploy --schema=prisma/schema.mysql.prisma",
     "db:migrate:dev": "prisma migrate dev"
   },
   "dependencies": {

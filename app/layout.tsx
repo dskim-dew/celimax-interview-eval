@@ -14,8 +14,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Celimax 면접 리포트 생성",
-  description: "AI 기반 면접 보고서 생성",
+  title: "Celi Hire",
+  description: "AI 기반 면접 분석 리포트",
+  icons: { icon: "/logo.png" },
 };
 
 export default function RootLayout({

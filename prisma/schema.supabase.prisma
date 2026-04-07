@@ -1,13 +1,14 @@
-// 로컬 개발용 (SQLite - Docker 불필요)
-// 프로덕션(MySQL/Aurora)은 prisma/schema.mysql.prisma 사용
+// Supabase (PostgreSQL) 배포용
+// 사용법: prisma generate --schema=prisma/schema.supabase.prisma
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model InterviewReport {
@@ -18,13 +19,13 @@ model InterviewReport {
   interviewRound   String?  @map("interview_round")
   interviewerName  String   @map("interviewer_name")
   reportAuthor     String   @default("") @map("report_author")
-  tiroScript       String   @map("tiro_script")
-  transcript       String?
-  qnaData          String?  @map("qna_data")
-  values           String?
-  competencies     String?
-  overall          String?
-  interviewerNotes String?  @map("interviewer_notes")
+  tiroScript       String   @db.Text @map("tiro_script")
+  transcript       String?  @db.Text
+  qnaData          Json?    @map("qna_data")
+  values           Json?
+  competencies     Json?
+  overall          Json?
+  interviewerNotes Json?    @map("interviewer_notes")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 

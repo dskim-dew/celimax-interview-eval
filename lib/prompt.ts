@@ -6,21 +6,21 @@ const MAX_SCRIPT_TOKENS = 3500;
 // Q&A 정리용 스크립트 토큰 예산 (전체 질문 보존을 위해 평가 프롬프트보다 넉넉하게)
 const MAX_QNA_SCRIPT_TOKENS = 5000;
 
-const CRITERIA = `**가치관 평가 (1-5점):**
-- honest(솔직): 5=실패/약점 구체적 인정+학습 설명 4=실패 공유하나 학습 일반적 3=어려운 부분 회피/모호 2=긍정면만 강조 1=과장/사실과 다름
-- proactive(능동): 5=업무 범위 넘어 자발적 문제발견/해결 4=업무 내 개선 실행 3=지시받은 일만 수행 2=수동적/지시 의존 1=개선 의지 없음
-- optimistic(낙관): 5=어려움에서 해결책 찾음/실패를 성장 기회로 4=긍정적 도전 경험 3=보통 긍정성 2=부정적/불만 위주 1=비관적/상황 탓
-- growth(성장): 5=구체적 자기개발 계획+실행+피드백 수용 4=학습 의지+노력 경험 3=관심 있으나 구체성 부족 2=현 역량 안주 1=발전 의지 없음/방어적
-- respect(존중): 5=다양한 의견 경청+갈등 시 상대 입장 고려 4=원만한 관계/건설적 대화 3=기본 예의 있으나 깊은 배려 부족 2=자기 주장 강함/수용성 낮음 1=비하/무시/공감 부족
-- altruistic(이타): 5=팀 위해 개인 이익 양보 경험 4=동료 지원/지식 공유 적극적 3=요청 시만 도움 2=개인 성과 중심/협업 소극적 1=이기적/팀워크 저해
-- immersed(몰입): 5=깊은 열정/자발적 시간 투자/디테일 집착 4=책임감 있게 완성도 추구 3=기본 업무 완수만 2=단순 처리 태도 1=열정 부족/최소 노력
+const CRITERIA = `**가치관 분석 (점수/등급 없이, 분석 내용만 정리):**
+- honest(솔직): 실패/약점 인정 여부, 사실 기반 답변인지, 과장·미화 경향 분석
+- proactive(능동): 자발적 문제 발견/해결 경험, 업무 범위 밖 기여 여부, 수동적/능동적 태도 분석
+- optimistic(낙관): 어려운 상황 대처 방식, 실패를 학습 기회로 전환하는지, 긍정/부정적 관점 분석
+- growth(성장): 자기개발 계획·실행 경험, 피드백 수용 태도, 학습 의지와 구체성 분석
+- respect(존중): 다양한 의견 경청 여부, 갈등 시 상대 입장 고려, 협업 태도 분석
+- altruistic(이타): 팀 기여/개인 이익 양보 경험, 동료 지원·지식 공유 태도 분석
+- immersed(몰입): 업무 열정/완성도 추구 정도, 디테일 집착, 자발적 노력 수준 분석
 
-**역량 평가 (4단계: 즉시 투입 가능/온보딩 후 가능/지원 필요, 리스크 있음/단기 투입 어려움):**
-- expertise(직무 전문성): 즉시=기술 완벽 보유 온보딩=기본기 있으나 도메인 학습 필요 지원=상당한 교육 필요 단기=기본 역량 부족
-- problemSolving(문제 해결력): 즉시=구조화된 접근/실행력 우수 온보딩=분석력 있으나 회사 맥락 필요 지원=단순 문제만 해결 단기=접근법 미흡
-- communication(커뮤니케이션): 즉시=논리적/명확/다양한 이해관계자 소통 온보딩=기본 양호/문화 적응 필요 지원=전달 어려움 보완 필요 단기=소통 어려움/협업 우려
+**역량 분석 (등급/레벨 없이, 분석 내용만 정리):**
+- expertise(직무 전문성): 보유 기술과 경험의 깊이, 도메인 이해도, 실무 적용 가능성 분석
+- problemSolving(문제 해결력): 문제 접근 방식, 구조적 사고, 실행력 수준 분석
+- communication(커뮤니케이션): 논리적 전달력, 이해관계자 소통 경험, 경청/질문 능력 분석
 
-**종합 추천:** 적극 추천(평균4.5↑+모두 즉시투입) / 추천(평균4↑+대부분 온보딩↑) / 조건부 추천(평균3↑+일부 우려) / 비추천(평균3↓ or 심각한 우려)`;
+**종합 분석 (추천 여부 판단 없이):** 강점, 리스크/우려사항, 종합 분석 의견을 정리`;
 
 const FIELD_RULES = `**필드 규칙:**
 - evidence: 면접자의 1인칭 직접 발언만. 추임새(음,어,네) 제거, 불완전 문장은 재구성. ❌"지원자는 ~했다" ✅"저는 팀장님께 직접 문제를 제기했습니다"
@@ -33,20 +33,18 @@ const JSON_RULES = `**출력: JSON만, {로 시작 }로 끝, 코드블록/설명
 
 const OUTPUT_SCHEMA = `{
   "values": {
-    "honest": { "score": 4, "evidence": ["발언1","발언2"], "specificCase": "사례설명", "concerns": [], "summary": "종합의견" },
-    "proactive": { "score": 3, "evidence": [...], "specificCase": "...", "concerns": [...], "summary": "..." },
+    "honest": { "evidence": ["발언1","발언2"], "specificCase": "사례설명", "concerns": [], "summary": "종합분석" },
+    "proactive": { "evidence": [...], "specificCase": "...", "concerns": [...], "summary": "..." },
     "optimistic": { ... }, "growth": { ... }, "respect": { ... }, "altruistic": { ... }, "immersed": { ... }
   },
   "competencies": {
-    "expertise": { "level": "온보딩 후 가능", "evidence": ["발언1"], "specificCase": "사례", "concerns": [], "summary": "의견" },
+    "expertise": { "evidence": ["발언1"], "specificCase": "사례", "concerns": [], "summary": "분석의견" },
     "problemSolving": { ... }, "communication": { ... }
   },
   "overall": {
-    "recommendation": "추천",
     "strengths": ["강점1","강점2","강점3"],
     "risks": ["리스크1","리스크2"],
-    "onboardingGuide": "온보딩 가이드",
-    "finalComment": "최종 종합 의견 3-4문장"
+    "finalComment": "종합 분석 의견 3-4문장"
   }
 }`;
 
@@ -69,7 +67,7 @@ ${trimmedScript}
 ${trimmedTranscript}`;
   }
 
-  return `면접 스크립트를 분석하여 셀리맥스 평가표 기준으로 JSON 생성.
+  return `면접 스크립트를 분석하여 Celi Hire 평가표 기준으로 JSON 생성.
 
 **면접 정보:**
 면접관: ${interviewInfo.interviewerName}
@@ -130,7 +128,7 @@ export function buildEvaluationFromQnAPrompt(interviewInfo: InterviewInfo, qnaDa
     `Q${item.id}. [${item.topic}] ${item.question}\nA. ${item.answer}`
   ).join('\n\n');
 
-  return `정리된 면접 Q&A를 분석하여 셀리맥스 평가표 기준으로 JSON 생성.
+  return `정리된 면접 Q&A를 분석하여 Celi Hire 평가표 기준으로 JSON 생성.
 
 **면접 정보:**
 면접관: ${interviewInfo.interviewerName}
@@ -154,7 +152,7 @@ ${OUTPUT_SCHEMA}`;
 
 // 데모 모드 프롬프트
 export function buildDemoPrompt(interviewInfo: InterviewInfo): string {
-  return `데모 모드: 가상의 현실적 면접 시나리오를 상상하여 셀리맥스 평가표 JSON 생성.
+  return `데모 모드: 가상의 현실적 면접 시나리오를 상상하여 Celi Hire 평가표 JSON 생성.
 
 **면접 정보:**
 면접관: ${interviewInfo.interviewerName}
@@ -165,7 +163,7 @@ export function buildDemoPrompt(interviewInfo: InterviewInfo): string {
 ${interviewInfo.tiroScript ? `\n**참조 스크립트:**\n${interviewInfo.tiroScript}` : ''}
 ${interviewInfo.transcript ? `\n**참조 메모:**\n${interviewInfo.transcript}` : ''}
 
-**시나리오 규칙:** ${interviewInfo.position} 포지션 경력 2-5년차 현실적 지원자 상상. 가치관 점수 2-5점 분포(평균 3.5-4.0), 최소 1-2개 우려사항 포함, 역량도 다양한 레벨. 강점과 리스크 모두 포함.
+**시나리오 규칙:** ${interviewInfo.position} 포지션 경력 2-5년차 현실적 지원자 상상. 최소 1-2개 우려사항 포함. 강점과 리스크 모두 균형있게 포함.
 
 ${CRITERIA}
 

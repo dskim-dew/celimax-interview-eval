@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getReportById, updateReport, deleteReport } from '@/lib/db-storage'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
+function errorResponse(message: string, error: unknown, status: number) {
+  console.error(`${message}:`, error)
+  return NextResponse.json(
+    { error: message, ...(isDev && { detail: String(error) }) },
+    { status }
+  )
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
@@ -12,8 +22,7 @@ export async function GET(
     }
     return NextResponse.json(report)
   } catch (error) {
-    console.error('GET /api/reports/[id] error:', error)
-    return NextResponse.json({ error: '보고서 조회에 실패했습니다.' }, { status: 500 })
+    return errorResponse('보고서 조회에 실패했습니다.', error, 500)
   }
 }
 
@@ -29,8 +38,7 @@ export async function PUT(
     }
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('PUT /api/reports/[id] error:', error)
-    return NextResponse.json({ error: '보고서 수정에 실패했습니다.' }, { status: 500 })
+    return errorResponse('보고서 수정에 실패했습니다.', error, 500)
   }
 }
 
@@ -45,7 +53,6 @@ export async function DELETE(
     }
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('DELETE /api/reports/[id] error:', error)
-    return NextResponse.json({ error: '보고서 삭제에 실패했습니다.' }, { status: 500 })
+    return errorResponse('보고서 삭제에 실패했습니다.', error, 500)
   }
 }

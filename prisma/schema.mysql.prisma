@@ -1,12 +1,12 @@
-// 로컬 개발용 (SQLite - Docker 불필요)
-// 프로덕션(MySQL/Aurora)은 prisma/schema.mysql.prisma 사용
+// 프로덕션용 (MySQL 8.0 / Aurora MySQL)
+// Docker 빌드 시 사용: prisma generate --schema=prisma/schema.mysql.prisma
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -18,13 +18,13 @@ model InterviewReport {
   interviewRound   String?  @map("interview_round")
   interviewerName  String   @map("interviewer_name")
   reportAuthor     String   @default("") @map("report_author")
-  tiroScript       String   @map("tiro_script")
-  transcript       String?
-  qnaData          String?  @map("qna_data")
-  values           String?
-  competencies     String?
-  overall          String?
-  interviewerNotes String?  @map("interviewer_notes")
+  tiroScript       String   @db.LongText @map("tiro_script")
+  transcript       String?  @db.LongText
+  qnaData          Json?    @map("qna_data")
+  values           Json?
+  competencies     Json?
+  overall          Json?
+  interviewerNotes Json?    @map("interviewer_notes")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 

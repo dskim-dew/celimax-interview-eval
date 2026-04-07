@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
       maxTokens: 8192,
       temperature: 0.3,
       maxRetries: 3,
+      system: '반드시 유효한 JSON만 출력하세요. 코드블록(```), 설명문, 마크다운 없이 {로 시작하고 }로 끝나는 순수 JSON만 응답합니다. 모든 속성 사이에 쉼표를 정확히 포함하세요.',
     });
 
     return new Response(stream, {

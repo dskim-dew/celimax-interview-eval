@@ -7,6 +7,13 @@ import CompetencyCard from './CompetencyCard';
 import OverallSection from './OverallSection';
 import InterviewerComment from './InterviewerComment';
 
+interface SectionIds {
+  overall?: string;
+  competency?: string;
+  values?: string;
+  notes?: string;
+}
+
 interface EvaluationReportProps {
   report: ReportType;
   onNotesChange?: (notes: InterviewerNotes) => void;
@@ -14,7 +21,9 @@ interface EvaluationReportProps {
   isSaving?: boolean;
   readOnly?: boolean;
   hideHeader?: boolean;
+  hideNotes?: boolean;
   finalDecisionReadOnly?: boolean;
+  sectionIds?: SectionIds;
 }
 
 export default function EvaluationReport({
@@ -24,18 +33,17 @@ export default function EvaluationReport({
   isSaving = false,
   readOnly = false,
   hideHeader = false,
+  hideNotes = false,
   finalDecisionReadOnly = false,
+  sectionIds = {},
 }: EvaluationReportProps) {
-  const valueScores = Object.values(report.values).map(v => v.score);
-  const avgScore = (valueScores.reduce((a, b) => a + b, 0) / valueScores.length).toFixed(1);
-
   return (
     <div className="space-y-6">
       {/* 헤더 (최종 리포트 페이지에서는 숨김) */}
       {!hideHeader && (
         <div className="glass-card p-6">
           <h1 className="text-2xl font-bold gradient-text mb-4">
-            면접 평가 보고서
+            면접 분석 리포트
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <p className="flex items-center gap-2">
@@ -74,16 +82,21 @@ export default function EvaluationReport({
         </div>
       )}
 
-      {/* 종합 평가 */}
-      <OverallSection evaluation={report.overall} />
+      {/* 종합 분석 */}
+      <div id={sectionIds.overall} className={sectionIds.overall ? 'scroll-mt-8' : undefined}>
+        <OverallSection evaluation={report.overall} />
+      </div>
 
       {/* 직무 역량 섹션 */}
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
+      <div
+        id={sectionIds.competency}
+        className={`rounded-2xl bg-purple-500/5 border border-purple-500/10 p-6${sectionIds.competency ? ' scroll-mt-8' : ''}`}
+      >
+        <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
           <Target className="w-5 h-5 text-purple-400" />
-          직무 역량 평가
+          직무 역량 분석
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {(Object.entries(COMPETENCY_NAMES) as [keyof CompetenciesEvaluation, string][]).map(([key, name]) => (
             <CompetencyCard
               key={key}
@@ -95,17 +108,15 @@ export default function EvaluationReport({
       </div>
 
       {/* 핵심 가치 섹션 */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Star className="w-5 h-5 text-blue-400" />
-            핵심 가치 평가
-          </h2>
-          <div className="px-4 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
-            <span className="text-blue-400 font-semibold">평균 {avgScore}점</span>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div
+        id={sectionIds.values}
+        className={`rounded-2xl bg-blue-500/5 border border-blue-500/10 p-6${sectionIds.values ? ' scroll-mt-8' : ''}`}
+      >
+        <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
+          <Star className="w-5 h-5 text-blue-400" />
+          핵심 가치 분석
+        </h2>
+        <div className="space-y-4">
           {(Object.entries(VALUE_NAMES) as [keyof ValuesEvaluation, string][]).map(([key, name]) => (
             <ValueScoreCard
               key={key}
@@ -116,13 +127,17 @@ export default function EvaluationReport({
         </div>
       </div>
 
-      {/* 면접관 추가 소견 */}
-      <InterviewerComment
-        notes={report.interviewerNotes}
-        onChange={onNotesChange || (() => {})}
-        readOnly={readOnly}
-        finalDecisionReadOnly={finalDecisionReadOnly}
-      />
+      {/* 면접관 소견 */}
+      {!hideNotes && (
+        <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
+          <InterviewerComment
+            notes={report.interviewerNotes}
+            onChange={onNotesChange || (() => {})}
+            readOnly={readOnly}
+            finalDecisionReadOnly={finalDecisionReadOnly}
+          />
+        </div>
+      )}
 
       {/* 최종 리포트 저장 버튼 (메인 페이지 평가표에서만 표시) */}
       {!readOnly && onSave && (

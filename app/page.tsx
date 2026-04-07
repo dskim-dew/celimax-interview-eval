@@ -4,17 +4,17 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FileText, FolderOpen, Plus, AlertCircle, RefreshCw, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
 import InterviewForm from '@/components/InterviewForm';
 import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import SaveConfirmDialog from '@/components/SaveConfirmDialog';
 import { InterviewInfo, EvaluationReport as ReportType, AIEvaluationResponse, InterviewerNotes, QnAData } from '@/lib/types';
 
 const EMPTY_NOTES: InterviewerNotes = {
-  strengths: '',
-  concerns: '',
-  validation: '',
+  comment: '',
 };
 
 // SSE 스트림 소비 헬퍼
@@ -78,6 +78,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<ReportType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [savedReportsCount, setSavedReportsCount] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
@@ -288,7 +289,12 @@ export default function Home() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
+    if (!report) return;
+    setShowSaveDialog(true);
+  };
+
+  const handleConfirmSave = async () => {
     if (!report) return;
 
     setIsSaving(true);
@@ -303,6 +309,7 @@ export default function Home() {
         body: JSON.stringify(updatedReport),
       });
       if (!res.ok) throw new Error('저장 실패');
+      setShowSaveDialog(false);
       router.push(`/report/${updatedReport.id}`);
     } catch {
       alert('저장에 실패했습니다. 다시 시도해주세요.');
@@ -340,12 +347,16 @@ export default function Home() {
       {/* 헤더 */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Celi Hire"
+            width={44}
+            height={44}
+            className="rounded-xl"
+          />
           <div>
-            <h1 className="text-2xl font-bold gradient-text">Celimax 면접 리포트 생성</h1>
-            <p className="text-sm text-slate-400">AI 기반 면접 보고서 생성</p>
+            <h1 className="text-2xl font-bold gradient-text">Celi Hire</h1>
+            <p className="text-sm text-slate-400">셀리맥스 면접 리포트</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -544,24 +555,33 @@ export default function Home() {
 
         </div>
       )}
+
+      {/* 저장 확인 다이얼로그 */}
+      {showSaveDialog && report && (
+        <SaveConfirmDialog
+          report={report}
+          onConfirm={handleConfirmSave}
+          onCancel={() => setShowSaveDialog(false)}
+          isSaving={isSaving}
+        />
+      )}
     </div>
   );
 }
 
 // 기존 형식 마이그레이션 (interviewerComment -> interviewerNotes, tiroLink -> tiroScript)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function migrateReport(report: ReportType): ReportType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = report as any;
   let migrated = { ...report };
 
   if (!report.interviewerNotes || typeof report.interviewerNotes !== 'object') {
-    const oldComment: string = raw.interviewerComment || '';
+    const oldComment: string = raw.interviewerComment || raw.interviewerNotes?.strengths || '';
     migrated = {
       ...migrated,
       interviewerNotes: {
-        strengths: oldComment,
-        concerns: '',
-        validation: '',
+        comment: oldComment,
       },
     };
   }

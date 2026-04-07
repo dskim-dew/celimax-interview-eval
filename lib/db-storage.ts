@@ -1,6 +1,5 @@
-import { Prisma } from '@prisma/client'
 import { prisma } from './db'
-import type { InterviewReport } from '@prisma/client'
+import type { InterviewReport, Prisma } from '@prisma/client'
 import type {
   EvaluationReport,
   InterviewRound,
@@ -10,6 +9,16 @@ import type {
   InterviewerNotes,
   QnAData,
 } from './types'
+
+// SQLite(String) / PostgreSQL(Json) 모두 호환
+function parseJson<T>(value: unknown): T | undefined {
+  if (value === null || value === undefined) return undefined
+  if (typeof value === 'object') return value as T        // native Json column
+  if (typeof value === 'string') {
+    try { return JSON.parse(value) as T } catch { return undefined }
+  }
+  return undefined
+}
 
 function fromDbRecord(record: InterviewReport): EvaluationReport {
   return {
@@ -26,15 +35,13 @@ function fromDbRecord(record: InterviewReport): EvaluationReport {
       tiroScript: record.tiroScript,
       transcript: record.transcript ?? undefined,
     },
-    values: record.values as unknown as ValuesEvaluation,
-    competencies: record.competencies as unknown as CompetenciesEvaluation,
-    overall: record.overall as unknown as OverallEvaluation,
-    interviewerNotes: (record.interviewerNotes as unknown as InterviewerNotes) ?? {
-      strengths: '',
-      concerns: '',
-      validation: '',
+    values: parseJson<ValuesEvaluation>(record.values)!,
+    competencies: parseJson<CompetenciesEvaluation>(record.competencies)!,
+    overall: parseJson<OverallEvaluation>(record.overall)!,
+    interviewerNotes: parseJson<InterviewerNotes>(record.interviewerNotes) ?? {
+      comment: '',
     },
-    qnaData: record.qnaData ? (record.qnaData as unknown as QnAData) : undefined,
+    qnaData: parseJson<QnAData>(record.qnaData),
   }
 }
 
@@ -49,11 +56,11 @@ function toDbInput(report: EvaluationReport) {
     reportAuthor: report.interviewInfo.reportAuthor ?? '',
     tiroScript: report.interviewInfo.tiroScript,
     transcript: report.interviewInfo.transcript ?? null,
-    qnaData: report.qnaData ? (report.qnaData as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
-    values: report.values as unknown as Prisma.InputJsonValue,
-    competencies: report.competencies as unknown as Prisma.InputJsonValue,
-    overall: report.overall as unknown as Prisma.InputJsonValue,
-    interviewerNotes: report.interviewerNotes as unknown as Prisma.InputJsonValue,
+    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : null,
+    values: JSON.stringify(report.values),
+    competencies: JSON.stringify(report.competencies),
+    overall: JSON.stringify(report.overall),
+    interviewerNotes: JSON.stringify(report.interviewerNotes),
   }
 }
 

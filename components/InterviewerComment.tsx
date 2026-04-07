@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { InterviewerNotes, FinalDecision } from '@/lib/types';
 import Linkify from './Linkify';
@@ -11,16 +12,35 @@ interface InterviewerCommentProps {
   finalDecisionReadOnly?: boolean;
 }
 
-function handleMarkdownKeyDown(
+function handleBulletKeyDown(
   e: React.KeyboardEvent<HTMLTextAreaElement>,
-  field: keyof InterviewerNotes,
   notes: InterviewerNotes,
   onChange: (notes: InterviewerNotes) => void
 ) {
-  if (e.key !== 'Enter') return;
-
   const textarea = e.currentTarget;
   const { selectionStart, value } = textarea;
+
+  // Tab → 불렛 삽입
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const before = value.substring(0, selectionStart);
+    const after = value.substring(selectionStart);
+    const lineStart = before.lastIndexOf('\n') + 1;
+    const currentLine = before.substring(lineStart);
+
+    // 현재 줄이 비어있거나 불렛이 아닌 경우 불렛 추가
+    if (!currentLine.startsWith('- ')) {
+      const newValue = value.substring(0, lineStart) + '- ' + currentLine + after;
+      onChange({ ...notes, comment: newValue });
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
+      }, 0);
+    }
+    return;
+  }
+
+  if (e.key !== 'Enter') return;
+
   const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
   const currentLine = value.substring(lineStart, selectionStart);
   const bulletMatch = currentLine.match(/^(\s*- )/);
@@ -30,20 +50,61 @@ function handleMarkdownKeyDown(
   e.preventDefault();
   const prefix = bulletMatch[1];
 
+  // 빈 불렛이면 해제
   if (currentLine.trimEnd() === '-' || currentLine === prefix) {
     const newValue = value.substring(0, lineStart) + '\n' + value.substring(selectionStart);
-    onChange({ ...notes, [field]: newValue });
+    onChange({ ...notes, comment: newValue });
     setTimeout(() => {
       textarea.selectionStart = textarea.selectionEnd = lineStart + 1;
     }, 0);
     return;
   }
 
+  // 새 불렛 줄 추가
   const newValue = value.substring(0, selectionStart) + '\n' + prefix + value.substring(selectionStart);
-  onChange({ ...notes, [field]: newValue });
+  onChange({ ...notes, comment: newValue });
   setTimeout(() => {
     textarea.selectionStart = textarea.selectionEnd = selectionStart + 1 + prefix.length;
   }, 0);
+}
+
+/** 마크다운 불렛을 HTML 리스트로 렌더링 */
+function RenderedComment({ text }: { text: string }) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let bulletItems: string[] = [];
+
+  const flushBullets = () => {
+    if (bulletItems.length === 0) return;
+    elements.push(
+      <ul key={`ul-${elements.length}`} className="space-y-1.5 my-1">
+        {bulletItems.map((item, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span className="text-blue-400 mt-0.5 shrink-0">•</span>
+            <span><Linkify>{item}</Linkify></span>
+          </li>
+        ))}
+      </ul>
+    );
+    bulletItems = [];
+  };
+
+  lines.forEach((line, i) => {
+    const trimmed = line.replace(/^\s*-\s+/, '');
+    if (line.match(/^\s*- /)) {
+      bulletItems.push(trimmed);
+    } else {
+      flushBullets();
+      if (line.trim()) {
+        elements.push(<p key={`p-${i}`}><Linkify>{line}</Linkify></p>);
+      } else if (elements.length > 0) {
+        elements.push(<br key={`br-${i}`} />);
+      }
+    }
+  });
+  flushBullets();
+
+  return <>{elements}</>;
 }
 
 const DECISIONS: { value: FinalDecision; label: string; activeClass: string; dimClass: string }[] = [
@@ -81,84 +142,28 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
 
       <div className="p-4 space-y-4">
         {readOnly ? (
-          <>
-            {/* 강점 */}
-            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-emerald-300 mb-2 flex items-center gap-2">
-                <span>💪</span> 지원자의 강점, 함께하고 싶은 이유
-              </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-emerald-400/20 text-sm">
-                <Linkify>{notes.strengths || '작성된 내용이 없습니다.'}</Linkify>
-              </div>
+          <div className="bg-slate-800/30 border border-slate-600/30 rounded-lg p-5">
+            <div className="text-slate-300 min-h-[48px] text-sm leading-relaxed">
+              {notes.comment
+                ? <RenderedComment text={notes.comment} />
+                : <span className="text-slate-500">작성된 내용이 없습니다.</span>
+              }
             </div>
-
-            {/* 우려사항 */}
-            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-amber-300 mb-2 flex items-center gap-2">
-                <span>⚠️</span> 우려되는 부분
-              </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-amber-400/20 text-sm">
-                <Linkify>{notes.concerns || '작성된 내용이 없습니다.'}</Linkify>
-              </div>
-            </div>
-
-            {/* 추가 검증 */}
-            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-blue-300 mb-2 flex items-center gap-2">
-                <span>🔍</span> 추가 검증이 필요한 부분
-              </h3>
-              <div className="text-slate-300 whitespace-pre-wrap min-h-[48px] bg-white/5 p-3 rounded-lg border border-blue-400/20 text-sm">
-                <Linkify>{notes.validation || '작성된 내용이 없습니다.'}</Linkify>
-              </div>
-            </div>
-          </>
+          </div>
         ) : (
-          <>
-            {/* 1. 강점 */}
-            <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-emerald-300 mb-2 flex items-center gap-2">
-                <span>💪</span> 지원자의 강점, 함께하고 싶은 이유
-              </h3>
-              <textarea
-                value={notes.strengths}
-                onChange={(e) => onChange({ ...notes, strengths: e.target.value })}
-                onKeyDown={(e) => handleMarkdownKeyDown(e, 'strengths', notes, onChange)}
-                placeholder="이 지원자와 함께 일하고 싶은 이유, 기대되는 점을 작성해주세요... (- 입력 시 불렛 목록)"
-                rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-emerald-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition resize-none text-sm"
-              />
-            </div>
-
-            {/* 2. 우려사항 */}
-            <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-amber-300 mb-2 flex items-center gap-2">
-                <span>⚠️</span> 우려되는 부분
-              </h3>
-              <textarea
-                value={notes.concerns}
-                onChange={(e) => onChange({ ...notes, concerns: e.target.value })}
-                onKeyDown={(e) => handleMarkdownKeyDown(e, 'concerns', notes, onChange)}
-                placeholder="채용 시 우려되는 점, 리스크 요인을 작성해주세요... (- 입력 시 불렛 목록)"
-                rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-amber-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-none text-sm"
-              />
-            </div>
-
-            {/* 3. 추가 검증 */}
-            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-5">
-              <h3 className="text-base font-semibold text-blue-300 mb-2 flex items-center gap-2">
-                <span>🔍</span> 추가 검증이 필요한 부분
-              </h3>
-              <textarea
-                value={notes.validation}
-                onChange={(e) => onChange({ ...notes, validation: e.target.value })}
-                onKeyDown={(e) => handleMarkdownKeyDown(e, 'validation', notes, onChange)}
-                placeholder="2차 면접이나 레퍼런스 체크에서 확인이 필요한 부분을 작성해주세요... (- 입력 시 불렛 목록)"
-                rows={4}
-                className="w-full px-4 py-3 bg-white/10 border border-blue-400/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none text-sm"
-              />
-            </div>
-          </>
+          <div>
+            <p className="text-xs text-slate-400 mb-2">
+              면접에서 느낀 점을 간략히 작성해주세요. (3~5줄 권장, <code className="text-slate-300">- </code> 입력 시 불렛 목록)
+            </p>
+            <textarea
+              value={notes.comment}
+              onChange={(e) => onChange({ ...notes, comment: e.target.value })}
+              onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
+              placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
+              rows={5}
+              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none text-sm font-mono"
+            />
+          </div>
         )}
 
         {/* 최종 의견 선택 */}

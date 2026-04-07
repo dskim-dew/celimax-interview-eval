@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { User, Briefcase, Users, FileText, Sparkles, Calendar, Wand2, ClipboardPaste, MessageSquare, Hash, X } from 'lucide-react';
-import { InterviewInfo, InterviewRound } from '@/lib/types';
+import { InterviewInfo } from '@/lib/types';
 
 interface InterviewFormProps {
   onSubmit: (data: InterviewInfo) => void;

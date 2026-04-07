@@ -41,6 +41,8 @@ export function truncateToTokenLimit(text: string, maxTokens: number): { text: s
 
 // AI 응답 JSON 정제 (잘린 응답 복구 포함)
 export function cleanAIResponse(rawText: string): string {
+  console.log('[cleanAIResponse] Raw first 300 chars:', rawText.substring(0, 300));
+
   let cleaned = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
   cleaned = cleaned.trim();
 
@@ -51,12 +53,27 @@ export function cleanAIResponse(rawText: string): string {
   const jsonStart = cleaned.indexOf('{');
   if (jsonStart === -1) throw new Error('JSON 시작점을 찾을 수 없습니다.');
   cleaned = cleaned.substring(jsonStart);
+  console.log('[cleanAIResponse] After extract, pos 30-50:', JSON.stringify(cleaned.substring(30, 50)));
+
+  // 누락된 쉼표 복구: 속성 값 뒤에 쉼표 없이 다음 속성 키가 오는 경우
+  const beforeCommaFix = cleaned;
+  cleaned = cleaned.replace(
+    /("(?:[^"\\]|\\.)*"|\d+(?:\.\d+)?|true|false|null|\]|\})\s*\n(\s*"(?:[^"\\]|\\.)*"\s*:)/g,
+    '$1,\n$2'
+  );
+  // 누락된 쉼표 복구: 배열 내 객체 사이 (}\n  {)
+  cleaned = cleaned.replace(/\}\s*\n(\s*\{)/g, '},\n$1');
+  if (beforeCommaFix !== cleaned) {
+    console.log('[cleanAIResponse] Comma fix changed the text!');
+    console.log('[cleanAIResponse] After comma fix, pos 30-50:', JSON.stringify(cleaned.substring(30, 50)));
+  }
 
   // 이미 유효한 JSON이면 바로 반환
   try {
     JSON.parse(cleaned);
     return cleaned;
-  } catch {
+  } catch (e) {
+    console.log('[cleanAIResponse] First parse failed:', (e as Error).message);
     // 복구 시도
   }
 
@@ -82,8 +99,8 @@ export function cleanAIResponse(rawText: string): string {
 
   for (const pos of closeBracePositions) {
     let candidate = repaired.substring(0, pos + 1);
-    // trailing comma 제거
-    candidate = candidate.replace(/,\s*$/gm, '');
+    // trailing comma 제거 (문자열 맨 끝만, m 플래그 없이)
+    candidate = candidate.replace(/,\s*$/, '');
     candidate = candidate.replace(/,\s*([}\]])/g, '$1');
 
     // 열린 문자열 닫기: 따옴표 수가 홀수면 마지막 따옴표 이전까지 자르고 닫기
@@ -117,7 +134,7 @@ export function cleanAIResponse(rawText: string): string {
   }
 
   // 최후의 수단: 원본에서 trailing comma 정리 후 브래킷 닫기
-  repaired = repaired.replace(/,\s*$/gm, '');
+  repaired = repaired.replace(/,\s*$/, '');
   repaired = repaired.replace(/,\s*([}\]])/g, '$1');
   // 잘린 문자열 값 닫기: 마지막 열린 따옴표 찾기
   const lastQuote = repaired.lastIndexOf('"');
@@ -146,6 +163,7 @@ interface GenerateOptions {
   maxTokens?: number;
   temperature?: number;
   maxRetries?: number;
+  system?: string;
 }
 
 // Rate-limit 인식 AI 호출 (재시도 포함)
@@ -158,6 +176,7 @@ export async function generateAIResponse<T>(
     maxTokens = 4096,
     temperature = 0.2,
     maxRetries = 3,
+    system,
   } = options;
 
   // 요청 간격 쓰로틀링
@@ -179,6 +198,7 @@ export async function generateAIResponse<T>(
         model,
         max_tokens: maxTokens,
         temperature,
+        ...(system ? { system } : {}),
         messages: [{ role: 'user', content: prompt }],
       });
 
@@ -237,6 +257,7 @@ export function createSSEStream(
     maxTokens = 4096,
     temperature = 0.2,
     maxRetries = 3,
+    system,
   } = options;
 
   const encoder = new TextEncoder();
@@ -266,6 +287,7 @@ export function createSSEStream(
             model,
             max_tokens: maxTokens,
             temperature,
+            ...(system ? { system } : {}),
             messages: [{ role: 'user', content: prompt }],
             stream: true,
           });
@@ -285,6 +307,8 @@ export function createSSEStream(
 
           // JSON 정제 및 파싱
           const cleaned = cleanAIResponse(fullText);
+          console.log('[SSE Stream] Cleaned pos 30-50:', JSON.stringify(cleaned.substring(30, 50)));
+          console.log('[SSE Stream] Cleaned chars 35-45:', Array.from(cleaned.substring(35, 45)).map((c, i) => `${35+i}:'${c}'(${c.charCodeAt(0)})`).join(' '));
           const parsed = JSON.parse(cleaned);
           sendEvent({ type: 'result', data: parsed });
           controller.close();
