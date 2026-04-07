@@ -2,6 +2,8 @@ import { getReports } from '@/lib/db-storage'
 import { EvaluationReport } from '@/lib/types'
 import HistoryClient from '@/components/HistoryClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HistoryPage() {
   let reports: EvaluationReport[] = []
   try {
