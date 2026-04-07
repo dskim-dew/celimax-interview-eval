@@ -21,6 +21,63 @@ function parseJson<T>(value: unknown): T | undefined {
   return undefined
 }
 
+// 이전 형식 → 새 형식 마이그레이션
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateOverall(raw: any): OverallEvaluation {
+  return {
+    strengths: raw.strengths ?? [],
+    risks: raw.risks ?? [],
+    finalComment: raw.finalComment ?? '',
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateNotes(raw: any): InterviewerNotes {
+  if (!raw) return { comment: '' }
+  // 이전 형식: {strengths, concerns, validation, finalDecision}
+  // 새 형식: {comment, finalDecision}
+  if (raw.comment !== undefined) return raw as InterviewerNotes
+  const parts = [raw.strengths, raw.concerns, raw.validation].filter(Boolean)
+  return {
+    comment: parts.join('\n'),
+    finalDecision: raw.finalDecision ?? undefined,
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateValues(raw: any): ValuesEvaluation {
+  if (!raw) return {} as ValuesEvaluation
+  const result: Record<string, unknown> = {}
+  for (const [key, val] of Object.entries(raw)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const v = val as any
+    result[key] = {
+      evidence: v.evidence ?? [],
+      specificCase: v.specificCase ?? '',
+      concerns: v.concerns ?? [],
+      summary: v.summary ?? '',
+    }
+  }
+  return result as unknown as ValuesEvaluation
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateCompetencies(raw: any): CompetenciesEvaluation {
+  if (!raw) return {} as CompetenciesEvaluation
+  const result: Record<string, unknown> = {}
+  for (const [key, val] of Object.entries(raw)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const v = val as any
+    result[key] = {
+      evidence: v.evidence ?? [],
+      specificCase: v.specificCase ?? '',
+      concerns: v.concerns ?? [],
+      summary: v.summary ?? '',
+    }
+  }
+  return result as unknown as CompetenciesEvaluation
+}
+
 function fromDbRecord(record: InterviewReport): EvaluationReport {
   return {
     id: record.id,
@@ -36,12 +93,10 @@ function fromDbRecord(record: InterviewReport): EvaluationReport {
       tiroScript: record.tiroScript,
       transcript: record.transcript ?? undefined,
     },
-    values: parseJson<ValuesEvaluation>(record.values)!,
-    competencies: parseJson<CompetenciesEvaluation>(record.competencies)!,
-    overall: parseJson<OverallEvaluation>(record.overall)!,
-    interviewerNotes: parseJson<InterviewerNotes>(record.interviewerNotes) ?? {
-      comment: '',
-    },
+    values: migrateValues(parseJson(record.values)),
+    competencies: migrateCompetencies(parseJson(record.competencies)),
+    overall: migrateOverall(parseJson(record.overall)),
+    interviewerNotes: migrateNotes(parseJson(record.interviewerNotes)),
     qnaData: parseJson<QnAData>(record.qnaData),
   }
 }
