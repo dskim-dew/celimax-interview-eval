@@ -1,5 +1,6 @@
 import { prisma } from './db'
-import type { InterviewReport, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import type { InterviewReport } from '@prisma/client'
 import type {
   EvaluationReport,
   InterviewRound,
@@ -56,11 +57,11 @@ function toDbInput(report: EvaluationReport) {
     reportAuthor: report.interviewInfo.reportAuthor ?? '',
     tiroScript: report.interviewInfo.tiroScript,
     transcript: report.interviewInfo.transcript ?? null,
-    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : null,
-    values: JSON.stringify(report.values),
-    competencies: JSON.stringify(report.competencies),
-    overall: JSON.stringify(report.overall),
-    interviewerNotes: JSON.stringify(report.interviewerNotes),
+    qnaData: report.qnaData ? JSON.parse(JSON.stringify(report.qnaData)) : Prisma.DbNull,
+    values: JSON.parse(JSON.stringify(report.values)),
+    competencies: JSON.parse(JSON.stringify(report.competencies)),
+    overall: JSON.parse(JSON.stringify(report.overall)),
+    interviewerNotes: JSON.parse(JSON.stringify(report.interviewerNotes)),
   }
 }
 
