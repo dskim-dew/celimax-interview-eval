@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  --background: linear-gradient(135deg, #0a1a0f 0%, #0f2418 50%, #0a1a0f 100%);
   --foreground: #f1f5f9;
 }
 
@@ -28,11 +28,11 @@ body {
 @layer components {
   /* 글래스모피즘 카드 스타일 */
   .glass-card {
-    @apply bg-slate-900/75 backdrop-blur-sm border border-slate-700/60 rounded-xl shadow-xl;
+    @apply bg-[#0d1f14]/75 backdrop-blur-sm border border-emerald-900/40 rounded-xl shadow-xl;
   }
 
   .glass-card-dark {
-    @apply bg-slate-900/50 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-xl;
+    @apply bg-[#0d1f14]/50 backdrop-blur-md border border-emerald-900/30 rounded-xl shadow-xl;
   }
 
   .glass-button {
@@ -40,12 +40,12 @@ body {
   }
 
   .glass-input {
-    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 text-white placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg;
+    @apply bg-[#0d1f14]/50 backdrop-blur-sm border border-emerald-800/40 text-white placeholder-slate-400 focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 rounded-lg;
   }
 
   /* 그라데이션 텍스트 */
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-lime-400 via-emerald-400 to-green-300 bg-clip-text text-transparent;
   }
 
   /* 레벨별 배지 색상 */
@@ -120,15 +120,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(13, 31, 20, 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(74, 222, 128, 0.2);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(74, 222, 128, 0.4);
 }

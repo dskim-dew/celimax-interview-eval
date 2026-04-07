@@ -47,33 +47,33 @@ export default function EvaluationReport({
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <p className="flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-400" />
+              <User className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">지원자:</span>
               <span className="font-medium text-white">{report.interviewInfo.candidateName}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-blue-400" />
+              <Briefcase className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">포지션:</span>
               <span className="font-medium text-white">{report.interviewInfo.position}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
+              <Users className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">면접관:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewerName}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-400" />
+              <Calendar className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">면접일:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewDate}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-blue-400" />
+              <Hash className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">인터뷰 차수:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewRound ?? '-'}</span>
             </p>
             {report.interviewInfo.reportAuthor && (
               <p className="flex items-center gap-2">
-                <PenLine className="w-4 h-4 text-purple-400" />
+                <PenLine className="w-4 h-4 text-lime-400" />
                 <span className="text-slate-300">작성자:</span>
                 <span className="font-medium text-white">{report.interviewInfo.reportAuthor}</span>
               </p>
@@ -90,10 +90,10 @@ export default function EvaluationReport({
       {/* 직무 역량 섹션 */}
       <div
         id={sectionIds.competency}
-        className={`rounded-2xl bg-purple-500/5 border border-purple-500/10 p-6${sectionIds.competency ? ' scroll-mt-8' : ''}`}
+        className={`rounded-2xl bg-emerald-500/5 border border-emerald-500/10 p-6${sectionIds.competency ? ' scroll-mt-8' : ''}`}
       >
         <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
-          <Target className="w-5 h-5 text-purple-400" />
+          <Target className="w-5 h-5 text-lime-400" />
           직무 역량 분석
         </h2>
         <div className="space-y-4">
@@ -110,10 +110,10 @@ export default function EvaluationReport({
       {/* 핵심 가치 섹션 */}
       <div
         id={sectionIds.values}
-        className={`rounded-2xl bg-blue-500/5 border border-blue-500/10 p-6${sectionIds.values ? ' scroll-mt-8' : ''}`}
+        className={`rounded-2xl bg-lime-500/5 border border-lime-500/10 p-6${sectionIds.values ? ' scroll-mt-8' : ''}`}
       >
         <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-5">
-          <Star className="w-5 h-5 text-blue-400" />
+          <Star className="w-5 h-5 text-emerald-400" />
           핵심 가치 분석
         </h2>
         <div className="space-y-4">

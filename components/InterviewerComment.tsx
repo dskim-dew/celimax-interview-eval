@@ -80,7 +80,7 @@ function RenderedComment({ text }: { text: string }) {
       <ul key={`ul-${elements.length}`} className="space-y-1.5 my-1">
         {bulletItems.map((item, i) => (
           <li key={i} className="flex items-start gap-2">
-            <span className="text-blue-400 mt-0.5 shrink-0">•</span>
+            <span className="text-emerald-400 mt-0.5 shrink-0">•</span>
             <span><Linkify>{item}</Linkify></span>
           </li>
         ))}
@@ -133,9 +133,9 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
 
   return (
     <div className="glass-card overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-800/80 to-blue-900/30 p-4 border-b border-white/10">
+      <div className="bg-gradient-to-r from-[#0d1f14] to-emerald-900/30 p-4 border-b border-white/10">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <MessageCircle className="w-5 h-5 text-blue-400" />
+          <MessageCircle className="w-5 h-5 text-emerald-400" />
           면접관 소견
         </h2>
       </div>
@@ -161,7 +161,7 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
               onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
               placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
               rows={5}
-              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none text-sm font-mono"
+              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition resize-none text-sm font-mono"
             />
           </div>
         )}

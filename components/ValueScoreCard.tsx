@@ -13,16 +13,16 @@ export default function ValueScoreCard({ name, evaluation }: ValueScoreCardProps
   const { evidence, specificCase, concerns, summary } = evaluation;
 
   return (
-    <div className="rounded-xl p-5 bg-blue-500/5 border border-blue-500/15">
+    <div className="rounded-xl p-5 bg-lime-500/5 border border-lime-500/15">
       {/* 항목명 + 요약 */}
-      <h3 className="text-base font-semibold text-blue-300 mb-2">{name}</h3>
+      <h3 className="text-base font-semibold text-lime-300 mb-2">{name}</h3>
       <p className="text-slate-300 text-sm mb-4"><Linkify>{summary}</Linkify></p>
 
       {/* 상세 내용 */}
-      <div className="space-y-3 border-t border-blue-500/10 pt-3">
+      <div className="space-y-3 border-t border-lime-500/10 pt-3">
         {specificCase && (
           <div>
-            <h4 className="text-xs font-medium text-purple-400 mb-1.5 flex items-center gap-1.5">
+            <h4 className="text-xs font-medium text-lime-400 mb-1.5 flex items-center gap-1.5">
               <CheckCircle className="w-3.5 h-3.5" />
               근거 사례
             </h4>
@@ -34,16 +34,16 @@ export default function ValueScoreCard({ name, evaluation }: ValueScoreCardProps
 
         {evidence.length > 0 && (
           <div>
-            <h4 className="text-xs font-medium text-blue-400 mb-1.5 flex items-center gap-1.5">
+            <h4 className="text-xs font-medium text-emerald-400 mb-1.5 flex items-center gap-1.5">
               <Quote className="w-3.5 h-3.5" />
               실제 발언
             </h4>
             <ul className="space-y-1">
               {evidence.map((item, idx) => (
                 <li key={idx} className="text-sm text-slate-400 flex items-start gap-1.5">
-                  <span className="text-blue-400 mt-0.5">&ldquo;</span>
+                  <span className="text-emerald-400 mt-0.5">&ldquo;</span>
                   <span className="italic"><Linkify>{item}</Linkify></span>
-                  <span className="text-blue-400 mt-0.5">&rdquo;</span>
+                  <span className="text-emerald-400 mt-0.5">&rdquo;</span>
                 </li>
               ))}
             </ul>

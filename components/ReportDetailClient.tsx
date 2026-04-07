@@ -77,33 +77,33 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <p className="flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-400" />
+              <User className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">지원자:</span>
               <span className="font-medium text-white">{report.interviewInfo.candidateName}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-blue-400" />
+              <Briefcase className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">포지션:</span>
               <span className="font-medium text-white">{report.interviewInfo.position}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
+              <Users className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">면접관:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewerName}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-400" />
+              <Calendar className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">면접일:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewDate}</span>
             </p>
             <p className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-blue-400" />
+              <Hash className="w-4 h-4 text-emerald-400" />
               <span className="text-slate-300">인터뷰 차수:</span>
               <span className="font-medium text-white">{report.interviewInfo.interviewRound ?? '-'}</span>
             </p>
             {report.interviewInfo.reportAuthor && (
               <p className="flex items-center gap-2">
-                <PenLine className="w-4 h-4 text-purple-400" />
+                <PenLine className="w-4 h-4 text-lime-400" />
                 <span className="text-slate-300">작성자:</span>
                 <span className="font-medium text-white">{report.interviewInfo.reportAuthor}</span>
               </p>

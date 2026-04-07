@@ -45,9 +45,9 @@ export default function SavedReportsList({ isOpen, onToggle, refreshTrigger }: S
         className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <FolderOpen className="w-5 h-5 text-purple-400" />
+          <FolderOpen className="w-5 h-5 text-lime-400" />
           <span className="font-semibold text-white">저장된 보고서</span>
-          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-lime-600/20 text-lime-400 border border-lime-500/30">
             {totalCount}개
           </span>
         </div>
