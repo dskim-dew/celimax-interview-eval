@@ -436,12 +436,12 @@ export default function Home() {
 
       {/* 데모 모드 알림 */}
       {report && isDemoMode && (
-        <div className="glass-card p-4 border-emerald-500/30 bg-emerald-500/10">
+        <div className="glass-card p-4 border-brand-deep/30 bg-brand-deep/15">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-brand-mid shrink-0 mt-0.5" />
             <div>
-              <p className="text-emerald-300 text-sm font-medium mb-1">데모 모드</p>
-              <p className="text-emerald-200/70 text-sm">
+              <p className="text-brand-light text-sm font-medium mb-1">데모 모드</p>
+              <p className="text-brand-light/70 text-sm">
                 면접 내용(Transcript)이 제공되지 않아 AI가 가상의 현실적인 면접 시나리오를 생성하여 평가했습니다.
                 실제 면접 내용을 입력하면 더 정확한 평가를 받을 수 있습니다.
               </p>
@@ -461,7 +461,7 @@ export default function Home() {
                 onClick={() => setActiveTab('qna')}
                 className={`flex-1 sm:flex-none px-6 py-4 font-semibold transition-all duration-200 ${
                   activeTab === 'qna'
-                    ? 'text-white border-b-2 border-emerald-400 bg-emerald-600/10'
+                    ? 'text-white border-b-2 border-brand-deep bg-brand-deep/10'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
                 }`}
               >
@@ -479,7 +479,7 @@ export default function Home() {
               disabled={!report}
               className={`flex-1 sm:flex-none px-6 py-4 font-semibold transition-all duration-200 ${
                 activeTab === 'evaluation'
-                  ? 'text-white border-b-2 border-emerald-400 bg-emerald-500/10'
+                  ? 'text-white border-b-2 border-brand-deep bg-brand-deep/15'
                   : report
                     ? 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
                     : 'text-slate-600 cursor-not-allowed'
@@ -523,11 +523,11 @@ export default function Home() {
 
                 {/* Q&A로 돌아가기 버튼 */}
                 {qnaData && (
-                  <div className="mt-6 p-4 bg-emerald-600/10 rounded-lg border border-emerald-400/30">
-                    <p className="text-emerald-300 mb-3 text-sm">원본 면접 Q&A를 다시 확인하고 싶으신가요?</p>
+                  <div className="mt-6 p-4 bg-brand-deep/10 rounded-lg border border-brand-deep/30">
+                    <p className="text-brand-light mb-3 text-sm">원본 면접 Q&A를 다시 확인하고 싶으신가요?</p>
                     <button
                       onClick={() => setActiveTab('qna')}
-                      className="px-6 py-3 bg-emerald-600 hover:bg-green-600 text-white rounded-lg transition flex items-center gap-2"
+                      className="px-6 py-3 bg-brand-deep hover:bg-brand-deep text-white rounded-lg transition flex items-center gap-2"
                     >
                       <MessageSquare className="w-5 h-5" />
                       Q&A 보기

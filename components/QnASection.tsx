@@ -29,7 +29,7 @@ export default function QnASection({
   return (
     <div className="space-y-4">
       {/* 메타 정보 */}
-      <div className="flex flex-wrap gap-4 text-sm text-slate-300 p-3 bg-emerald-600/10 rounded-lg border border-emerald-400/30">
+      <div className="flex flex-wrap gap-4 text-sm text-slate-300 p-3 bg-brand-deep/10 rounded-lg border border-brand-deep/30">
         <span>총 질문: {qnaData.metadata.totalQuestions}개</span>
         <span>주요 주제: {qnaData.metadata.mainTopics.join(', ')}</span>
       </div>
@@ -40,7 +40,7 @@ export default function QnASection({
           onClick={() => setTopicFilter(null)}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
             !topicFilter
-              ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-400/40'
+              ? 'bg-brand-deep/30 text-brand-light border border-brand-deep/40'
               : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
           }`}
         >
@@ -54,7 +54,7 @@ export default function QnASection({
               onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 topicFilter === topic
-                  ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-400/40'
+                  ? 'bg-brand-deep/30 text-brand-light border border-brand-deep/40'
                   : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
               }`}
             >
@@ -71,15 +71,15 @@ export default function QnASection({
             key={item.id}
             className="bg-white/5 rounded-lg p-5 border border-white/10"
           >
-            <span className="inline-block px-3 py-1 bg-emerald-600/20 text-emerald-300 text-xs rounded-full mb-3">
+            <span className="inline-block px-3 py-1 bg-brand-deep/20 text-brand-light text-xs rounded-full mb-3">
               {item.topic}
             </span>
 
             <div className="mb-3">
-              <p className="text-sm text-emerald-300 mb-1 font-medium">
+              <p className="text-sm text-brand-light mb-1 font-medium">
                 Q{item.id}. 면접관
               </p>
-              <p className="text-white pl-4 border-l-2 border-emerald-500">
+              <p className="text-white pl-4 border-l-2 border-brand-deep">
                 <Linkify>{item.question}</Linkify>
               </p>
             </div>
@@ -104,7 +104,7 @@ export default function QnASection({
           className={`w-full mt-4 py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-3 ${
             evaluationLoading
               ? 'bg-slate-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40'
+              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-brand-deep/25 hover:shadow-brand-deep/40'
           }`}
         >
           {evaluationLoading ? (
@@ -123,11 +123,11 @@ export default function QnASection({
 
       {/* 평가표로 이동 버튼 (완료 시) */}
       {hasReport && onSwitchToEvaluation && (
-        <div className="mt-6 p-4 bg-emerald-500/10 rounded-lg border border-emerald-400/30">
-          <p className="text-emerald-300 mb-3 text-sm font-medium">평가표 작성이 완료되었습니다</p>
+        <div className="mt-6 p-4 bg-brand-deep/15 rounded-lg border border-brand-deep/30">
+          <p className="text-brand-light mb-3 text-sm font-medium">평가표 작성이 완료되었습니다</p>
           <button
             onClick={onSwitchToEvaluation}
-            className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition flex items-center gap-2"
+            className="px-6 py-3 bg-emerald-500 hover:bg-brand-deep text-white rounded-lg transition flex items-center gap-2"
           >
             <FileText className="w-5 h-5" />
             평가표 보기

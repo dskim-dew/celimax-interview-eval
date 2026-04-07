@@ -31,7 +31,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
             {/* 정보 영역 */}
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-bold text-white leading-snug truncate mb-1.5">
-                <span className="text-emerald-300">
+                <span className="text-brand-light">
                   [{report.interviewInfo.interviewRound
                     ? `${report.interviewInfo.interviewRound} 인터뷰`
                     : '인터뷰'}]
@@ -43,11 +43,11 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
               </h3>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5 text-emerald-400" />
+                  <Users className="w-3.5 h-3.5 text-brand-mid" />
                   {report.interviewInfo.interviewerName}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                  <Calendar className="w-3.5 h-3.5 text-brand-mid" />
                   {report.interviewInfo.interviewDate}
                 </span>
               </div>
@@ -57,7 +57,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
             <div className="flex items-center gap-1.5 shrink-0">
               <Link
                 href={`/report/${report.id}`}
-                className="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors border border-emerald-500/30"
+                className="p-2 rounded-lg bg-brand-deep/20 text-brand-mid hover:bg-brand-deep/35 transition-colors border border-brand-deep/30"
                 title="리포트 보기"
               >
                 <ExternalLink className="w-4 h-4" />

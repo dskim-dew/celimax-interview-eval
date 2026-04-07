@@ -78,7 +78,7 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-brand-deep to-brand-dark">
             <FolderOpen className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -96,12 +96,12 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
       <div className="glass-card overflow-hidden">
         {/* 필터 헤더 */}
         <div className="flex items-center gap-2 px-5 py-3 border-b border-white/10 bg-white/5">
-          <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
+          <SlidersHorizontal className="w-4 h-4 text-brand-mid" />
           <span className="text-sm font-semibold text-slate-200">검색 및 필터</span>
           {isFiltered && (
             <span className="ml-auto flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-              <span className="text-xs text-emerald-300">필터 적용 중</span>
+              <span className="text-xs text-brand-light">필터 적용 중</span>
             </span>
           )}
         </div>
@@ -191,13 +191,13 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
             <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5">
               <span className="text-xs text-slate-500 mr-1">적용됨:</span>
               {searchQuery && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600/15 text-emerald-300 text-xs rounded-full border border-emerald-500/25">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-deep/15 text-brand-light text-xs rounded-full border border-brand-deep/25">
                   &ldquo;{searchQuery}&rdquo;
                   <button onClick={() => setSearchQuery('')} className="hover:text-white"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {positionFilter && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/15 text-emerald-300 text-xs rounded-full border border-emerald-500/25">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-deep/15 text-brand-light text-xs rounded-full border border-brand-deep/25">
                   <Briefcase className="w-3 h-3" />
                   {positionFilter}
                   <button onClick={() => setPositionFilter('')} className="hover:text-white"><X className="w-3 h-3" /></button>

@@ -4,7 +4,7 @@
 
 :root {
   --background: linear-gradient(135deg, #0a0f0c 0%, #0d1410 50%, #0a0f0c 100%);
-  --foreground: #f1f5f9;
+  --foreground: #EBF4DD;
 }
 
 html {
@@ -26,13 +26,12 @@ body {
 }
 
 @layer components {
-  /* 글래스모피즘 카드 스타일 */
   .glass-card {
-    @apply bg-[#0d1f14]/75 backdrop-blur-sm border border-emerald-900/40 rounded-xl shadow-xl;
+    @apply bg-brand-dark/40 backdrop-blur-sm border border-brand-deep/20 rounded-xl shadow-xl;
   }
 
   .glass-card-dark {
-    @apply bg-[#0d1f14]/50 backdrop-blur-md border border-emerald-900/30 rounded-xl shadow-xl;
+    @apply bg-brand-dark/30 backdrop-blur-md border border-brand-deep/15 rounded-xl shadow-xl;
   }
 
   .glass-button {
@@ -40,15 +39,13 @@ body {
   }
 
   .glass-input {
-    @apply bg-[#0d1f14]/50 backdrop-blur-sm border border-emerald-800/40 text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-lg;
+    @apply bg-brand-dark/30 backdrop-blur-sm border border-brand-deep/30 text-white placeholder-slate-400 focus:border-brand-mid focus:ring-2 focus:ring-brand-mid/20 rounded-lg;
   }
 
-  /* 그라데이션 텍스트 */
   .gradient-text {
-    @apply bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-light via-brand-mid to-brand-deep bg-clip-text text-transparent;
   }
 
-  /* 레벨별 배지 색상 */
   .badge-green {
     @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
   }
@@ -65,70 +62,28 @@ body {
     @apply bg-red-500/20 text-red-400 border border-red-500/30;
   }
 
-  /* 점수별 색상 */
-  .score-5 {
-    @apply bg-emerald-500 text-white;
-  }
-
-  .score-4 {
-    @apply bg-emerald-500 text-slate-900;
-  }
-
-  .score-3 {
-    @apply bg-yellow-500 text-slate-900;
-  }
-
-  .score-2 {
-    @apply bg-orange-500 text-white;
-  }
-
-  .score-1 {
-    @apply bg-red-500 text-white;
-  }
+  .score-5 { @apply bg-emerald-500 text-white; }
+  .score-4 { @apply bg-emerald-500 text-slate-900; }
+  .score-3 { @apply bg-yellow-500 text-slate-900; }
+  .score-2 { @apply bg-orange-500 text-white; }
+  .score-1 { @apply bg-red-500 text-white; }
 }
 
-/* 탭 전환 애니메이션 */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* 인쇄 모드: 탭 숨기고 전체 콘텐츠 표시 */
 @media print {
-  .tab-buttons {
-    display: none !important;
-  }
-  .tab-content-hidden {
-    display: block !important;
-  }
+  .tab-buttons { display: none !important; }
+  .tab-content-hidden { display: block !important; }
 }
 
-/* 스크롤바 스타일링 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(13, 31, 20, 0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(74, 222, 128, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 222, 128, 0.4);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(59, 73, 83, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(90, 120, 99, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(90, 120, 99, 0.5); }

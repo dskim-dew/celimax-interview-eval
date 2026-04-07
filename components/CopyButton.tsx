@@ -78,7 +78,7 @@ export default function CopyButton({ report }: CopyButtonProps) {
                   </div>
                 </div>
                 {copiedFormat === 'summary' && (
-                  <Check className="w-5 h-5 text-emerald-400" />
+                  <Check className="w-5 h-5 text-brand-mid" />
                 )}
               </button>
 
@@ -94,7 +94,7 @@ export default function CopyButton({ report }: CopyButtonProps) {
                   </div>
                 </div>
                 {copiedFormat === 'link' && (
-                  <Check className="w-5 h-5 text-emerald-400" />
+                  <Check className="w-5 h-5 text-brand-mid" />
                 )}
               </button>
             </div>

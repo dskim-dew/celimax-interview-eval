@@ -66,36 +66,36 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
 
             <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${
               hasComment
-                ? 'bg-emerald-500/10 border-emerald-500/25'
+                ? 'bg-brand-deep/15 border-brand-deep/25'
                 : 'bg-red-500/10 border-red-500/25'
             }`}>
               {hasComment
-                ? <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                ? <CheckCircle2 className="w-5 h-5 text-brand-mid shrink-0" />
                 : <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
               }
               <div className="flex items-center gap-2 flex-1">
                 <MessageCircle className="w-4 h-4 text-slate-400" />
                 <span className="text-sm text-slate-200">면접관 소견</span>
               </div>
-              <span className={`text-xs font-medium ${hasComment ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`text-xs font-medium ${hasComment ? 'text-brand-mid' : 'text-red-400'}`}>
                 {hasComment ? '작성 완료' : '미작성'}
               </span>
             </div>
 
             <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${
               hasDecision
-                ? 'bg-emerald-500/10 border-emerald-500/25'
+                ? 'bg-brand-deep/15 border-brand-deep/25'
                 : 'bg-red-500/10 border-red-500/25'
             }`}>
               {hasDecision
-                ? <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                ? <CheckCircle2 className="w-5 h-5 text-brand-mid shrink-0" />
                 : <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
               }
               <div className="flex items-center gap-2 flex-1">
                 <ThumbsUp className="w-4 h-4 text-slate-400" />
                 <span className="text-sm text-slate-200">최종 의견</span>
               </div>
-              <span className={`text-xs font-medium ${hasDecision ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`text-xs font-medium ${hasDecision ? 'text-brand-mid' : 'text-red-400'}`}>
                 {hasDecision ? decisionLabel[report.interviewerNotes.finalDecision!] : '미선택'}
               </span>
             </div>
@@ -126,7 +126,7 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
             className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               isSaving
                 ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/20'
+                : 'bg-brand-deep text-white hover:bg-brand-mid shadow-lg shadow-brand-deep/20'
             }`}
           >
             {isSaving ? '저장 중...' : '저장'}

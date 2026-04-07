@@ -146,7 +146,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
   return (
     <form onSubmit={handleSubmit} className="glass-card p-6">
       <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-        <FileText className="w-5 h-5 text-emerald-400" />
+        <FileText className="w-5 h-5 text-brand-mid" />
         면접 정보 입력
       </h2>
 
@@ -156,7 +156,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-400" />
+              <Users className="w-4 h-4 text-brand-mid" />
               면접관 이름 *
             </span>
           </label>
@@ -169,13 +169,13 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
             {interviewers.map((name, idx) => (
               <span
                 key={idx}
-                className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-full text-sm font-medium whitespace-nowrap"
+                className="flex items-center gap-1 px-2.5 py-1 bg-brand-deep/20 border border-brand-deep/40 text-brand-light rounded-full text-sm font-medium whitespace-nowrap"
               >
                 {name}
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); removeInterviewer(idx); }}
-                  className="ml-0.5 text-emerald-300 hover:text-white transition-colors"
+                  className="ml-0.5 text-brand-light hover:text-white transition-colors"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -204,7 +204,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="reportAuthor" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <User className="w-4 h-4 text-emerald-400" />
+              <User className="w-4 h-4 text-brand-mid" />
               리포트 작성자 *
             </span>
           </label>
@@ -224,7 +224,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="interviewDate" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-emerald-400" />
+              <Calendar className="w-4 h-4 text-brand-mid" />
               면접 일자 *
             </span>
           </label>
@@ -243,7 +243,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="position" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-emerald-400" />
+              <Briefcase className="w-4 h-4 text-brand-mid" />
               지원 포지션 *
             </span>
           </label>
@@ -263,7 +263,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="candidateName" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <User className="w-4 h-4 text-emerald-400" />
+              <User className="w-4 h-4 text-brand-mid" />
               지원자 이름 *
             </span>
           </label>
@@ -283,7 +283,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div>
           <label htmlFor="interviewRound" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-emerald-400" />
+              <Hash className="w-4 h-4 text-brand-mid" />
               인터뷰 차수 *
             </span>
           </label>
@@ -306,12 +306,12 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
       <div className="mb-6">
         <label htmlFor="tiroScript" className="block text-sm font-medium text-slate-300 mb-2">
           <span className="flex items-center gap-2">
-            <ClipboardPaste className="w-4 h-4 text-emerald-400" />
+            <ClipboardPaste className="w-4 h-4 text-brand-mid" />
             Tiro 면접 스크립트
           </span>
         </label>
-        <div className="mb-2 p-3 bg-emerald-500/10 border border-emerald-400/30 rounded-lg">
-          <p className="text-sm text-emerald-300 flex items-center gap-2">
+        <div className="mb-2 p-3 bg-brand-deep/15 border border-brand-deep/30 rounded-lg">
+          <p className="text-sm text-brand-light flex items-center gap-2">
             <span>💡</span>
             Tiro에서 <strong>&quot;LLM용으로 복사&quot;</strong>를 선택하여 아래에 붙여넣어주세요
           </p>
@@ -332,12 +332,12 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
 
       {/* 데모 모드 안내 */}
       {isDemoMode && (
-        <div className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+        <div className="mb-6 p-4 rounded-lg bg-brand-deep/15 border border-brand-deep/30">
           <div className="flex items-start gap-3">
-            <Wand2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <Wand2 className="w-5 h-5 text-brand-mid shrink-0 mt-0.5" />
             <div>
-              <p className="text-emerald-300 text-sm font-medium">데모 모드로 실행됩니다</p>
-              <p className="text-emerald-200/70 text-xs mt-1">
+              <p className="text-brand-light text-sm font-medium">데모 모드로 실행됩니다</p>
+              <p className="text-brand-light/70 text-xs mt-1">
                 Tiro 스크립트가 입력되지 않아 AI가 가상의 현실적인 면접 시나리오를 생성하여 평가합니다.
                 실제 면접 스크립트를 입력하면 더 정확한 평가를 받을 수 있습니다.
               </p>
@@ -353,7 +353,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
           className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-3 ${
             isLoading
               ? 'bg-slate-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-lg shadow-green-500/25 hover:shadow-green-500/40'
+              : 'bg-gradient-to-r from-brand-deep to-brand-dark hover:from-brand-mid hover:to-brand-deep shadow-lg shadow-brand-deep/25 hover:shadow-brand-deep/40'
           }`}
         >
           {isLoading ? (
