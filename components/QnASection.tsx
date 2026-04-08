@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
-import { QnAData, QNA_TOPIC_ORDER, QnATopicCategory } from '@/lib/types';
+import { QnAData, QNA_TOPIC_ORDER } from '@/lib/types';
 import Linkify from './Linkify';
 
 interface QnASectionProps {

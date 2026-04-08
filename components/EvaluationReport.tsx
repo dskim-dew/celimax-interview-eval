@@ -1,6 +1,6 @@
 'use client';
 
-import { Save, User, Briefcase, Users, Calendar, Star, Target, Hash, PenLine, MessageSquare, UserCheck } from 'lucide-react';
+import { Save, Star, Target, MessageSquare } from 'lucide-react';
 import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, ValuesEvaluation, CompetenciesEvaluation, QnAData } from '@/lib/types';
 import ValueScoreCard from './ValueScoreCard';
 import CompetencyCard from './CompetencyCard';

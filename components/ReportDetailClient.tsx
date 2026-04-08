@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Clock, User, Briefcase, Users, Calendar, Hash, UserCheck, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import EvaluationReport from '@/components/EvaluationReport';
 import CopyButton from '@/components/CopyButton';
 import ReportTOC, { TOCItem } from '@/components/ReportTOC';
