@@ -77,7 +77,6 @@ export default function Home() {
   const [report, setReport] = useState<ReportType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [savedReportsCount, setSavedReportsCount] = useState(0);
 
   // 2단계 프로세스 상태
   const [qnaData, setQnaData] = useState<QnAData | null>(null);
@@ -111,12 +110,6 @@ export default function Home() {
     return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
   }, []);
 
-  useEffect(() => {
-    fetch('/api/reports')
-      .then(res => res.ok ? res.json() : [])
-      .then((reports: ReportType[]) => setSavedReportsCount(reports.length))
-      .catch(() => {});
-  }, []);
 
   // 1단계: Q&A 정리
   const handleSubmit = async (interviewInfo: InterviewInfo) => {
