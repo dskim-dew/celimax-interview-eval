@@ -83,8 +83,8 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
 
   useEffect(() => {
     fetch('/api/positions')
-      .then(res => res.json())
-      .then((data: Position[]) => setPositions(data))
+      .then(res => res.ok ? res.json() : [])
+      .then((data) => setPositions(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 

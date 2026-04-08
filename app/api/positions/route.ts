@@ -13,7 +13,8 @@ export async function GET(request: Request) {
     })
     return NextResponse.json(positions)
   } catch {
-    return NextResponse.json({ error: '포지션 목록 조회 실패' }, { status: 500 })
+    // 테이블이 없을 수 있음 (DB 마이그레이션 전)
+    return NextResponse.json([])
   }
 }
 
