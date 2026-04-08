@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, FolderOpen, ArrowLeft, SlidersHorizontal, X, Briefcase, CalendarRange } from 'lucide-react';
+import { Search, FolderOpen, ArrowLeft, SlidersHorizontal, X, Briefcase, CalendarRange, Users } from 'lucide-react';
 import ReportList from '@/components/ReportList';
 import { EvaluationReport } from '@/lib/types';
 
@@ -14,7 +14,8 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
   const [allReports, setAllReports] = useState<EvaluationReport[]>(initialReports);
 
   // 필터 상태
-  const [searchQuery, setSearchQuery] = useState('');
+  const [candidateQuery, setCandidateQuery] = useState('');
+  const [interviewerFilter, setInterviewerFilter] = useState('');
   const [positionFilter, setPositionFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -25,20 +26,23 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
     return Array.from(new Set(positions)).sort();
   }, [allReports]);
 
+  // 면접관 목록 (중복 제거, 가나다순)
+  const interviewerOptions = useMemo(() => {
+    const interviewers = allReports.map(r => r.interviewInfo.interviewerName).filter(Boolean);
+    return Array.from(new Set(interviewers)).sort((a, b) => a.localeCompare(b, 'ko'));
+  }, [allReports]);
+
   // 필터 적용
   const filteredReports = useMemo(() => {
     return allReports.filter(report => {
       const { candidateName, position, interviewerName, interviewDate } = report.interviewInfo;
 
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const match =
-          candidateName.toLowerCase().includes(q) ||
-          position.toLowerCase().includes(q) ||
-          interviewerName.toLowerCase().includes(q);
-        if (!match) return false;
+      if (candidateQuery.trim()) {
+        const q = candidateQuery.toLowerCase();
+        if (!candidateName.toLowerCase().includes(q)) return false;
       }
 
+      if (interviewerFilter && interviewerName !== interviewerFilter) return false;
       if (positionFilter && position !== positionFilter) return false;
 
       if (startDate && interviewDate < startDate) return false;
@@ -46,9 +50,9 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
 
       return true;
     });
-  }, [allReports, searchQuery, positionFilter, startDate, endDate]);
+  }, [allReports, candidateQuery, interviewerFilter, positionFilter, startDate, endDate]);
 
-  const isFiltered = searchQuery || positionFilter || startDate || endDate;
+  const isFiltered = candidateQuery || interviewerFilter || positionFilter || startDate || endDate;
 
   const handleDelete = async (id: string) => {
     try {
@@ -61,7 +65,8 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
   };
 
   const handleReset = () => {
-    setSearchQuery('');
+    setCandidateQuery('');
+    setInterviewerFilter('');
     setPositionFilter('');
     setStartDate('');
     setEndDate('');
@@ -108,24 +113,52 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
 
         <div className="p-5 space-y-4">
           {/* 입력 그리드 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* 텍스트 검색 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {/* 지원자 검색 */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                 <Search className="w-3.5 h-3.5" />
-                지원자 · 면접관
+                지원자
               </label>
               <div className="relative">
                 <input
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={candidateQuery}
+                  onChange={(e) => setCandidateQuery(e.target.value)}
                   placeholder="이름으로 검색"
                   className="w-full px-3 py-2 glass-input text-sm"
                 />
-                {searchQuery && (
+                {candidateQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setCandidateQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 면접관 드롭다운 */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                면접관
+              </label>
+              <div className="relative">
+                <select
+                  value={interviewerFilter}
+                  onChange={(e) => setInterviewerFilter(e.target.value)}
+                  className="w-full px-3 py-2 glass-input text-sm bg-slate-800/50 appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-slate-800">전체 면접관</option>
+                  {interviewerOptions.map(name => (
+                    <option key={name} value={name} className="bg-slate-800">{name}</option>
+                  ))}
+                </select>
+                {interviewerFilter && (
+                  <button
+                    onClick={() => setInterviewerFilter('')}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -163,7 +196,7 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
             </div>
 
             {/* 날짜 범위 */}
-            <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
+            <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                 <CalendarRange className="w-3.5 h-3.5" />
                 면접일 범위
@@ -190,10 +223,17 @@ export default function HistoryClient({ initialReports }: HistoryClientProps) {
           {isFiltered && (
             <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5">
               <span className="text-xs text-slate-500 mr-1">적용됨:</span>
-              {searchQuery && (
+              {candidateQuery && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-deep/15 text-brand-light text-xs rounded-full border border-brand-deep/25">
-                  &ldquo;{searchQuery}&rdquo;
-                  <button onClick={() => setSearchQuery('')} className="hover:text-white"><X className="w-3 h-3" /></button>
+                  지원자: &ldquo;{candidateQuery}&rdquo;
+                  <button onClick={() => setCandidateQuery('')} className="hover:text-white"><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {interviewerFilter && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-deep/15 text-brand-light text-xs rounded-full border border-brand-deep/25">
+                  <Users className="w-3 h-3" />
+                  {interviewerFilter}
+                  <button onClick={() => setInterviewerFilter('')} className="hover:text-white"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {positionFilter && (

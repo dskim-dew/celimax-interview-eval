@@ -1,5 +1,5 @@
 // 인터뷰 차수
-export type InterviewRound = '1차' | '2차' | '기타';
+export type InterviewRound = '1차' | '2차' | '1+2차' | '커피챗' | '기타';
 
 // 면접 기본 정보
 export interface InterviewInfo {
@@ -54,18 +54,23 @@ export interface OverallEvaluation {
   finalComment: string;
 }
 
+// Q&A 카테고리
+export type QnATopicCategory = '가치관' | '역량' | '동기/지원배경' | '기타';
+
+export const QNA_TOPIC_ORDER: QnATopicCategory[] = ['가치관', '역량', '동기/지원배경', '기타'];
+
 // Q&A 아이템
 export interface QnAItem {
   id: number;
   question: string;
   answer: string;
-  topic: string;
+  topic: QnATopicCategory;
 }
 
 // Q&A 메타데이터
 export interface QnAMetadata {
   totalQuestions: number;
-  mainTopics: string[];
+  mainTopics: QnATopicCategory[];
 }
 
 // Q&A 전체 데이터
@@ -76,6 +81,9 @@ export interface QnAData {
 
 // 최종 의견 선택값
 export type FinalDecision = 'drop' | 'weak-go' | 'strong-go' | null;
+
+// 대표 확인 결과
+export type CeoDecision = 'pass' | 'drop' | null;
 
 // 면접관 추가 소견 (간소화)
 export interface InterviewerNotes {
@@ -89,11 +97,12 @@ export interface EvaluationReport {
   createdAt: string;
   updatedAt: string;
   interviewInfo: InterviewInfo;
-  values: ValuesEvaluation;
-  competencies: CompetenciesEvaluation;
-  overall: OverallEvaluation;
+  values?: ValuesEvaluation;
+  competencies?: CompetenciesEvaluation;
+  overall?: OverallEvaluation;
   interviewerNotes: InterviewerNotes;
   qnaData?: QnAData;
+  ceoDecision?: CeoDecision;
 }
 
 // AI 응답 타입 (interviewInfo, id, dates, interviewerNotes 제외)

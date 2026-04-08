@@ -1,8 +1,16 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { User, Briefcase, Users, FileText, Sparkles, Calendar, Wand2, ClipboardPaste, MessageSquare, Hash, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { User, Briefcase, Users, FileText, Sparkles, Calendar, ClipboardPaste, MessageSquare, Hash, PenLine, UserCheck, X, ExternalLink } from 'lucide-react';
 import { InterviewInfo } from '@/lib/types';
+
+interface Position {
+  id: string;
+  positionName: string;
+  hiringManager: string;
+  hrPm: string;
+  isActive: boolean;
+}
 
 interface InterviewFormProps {
   onSubmit: (data: InterviewInfo) => void;
@@ -39,37 +47,67 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
     position: '',
     candidateName: '',
     tiroScript: '',
-    interviewDate: new Date().toISOString().split('T')[0],
+    interviewDate: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
     interviewRound: '1차',
   });
 
   // 면접관 태그 상태
-  const [interviewers, setInterviewers] = useState<string[]>([]);
-  const [interviewerInput, setInterviewerInput] = useState('');
-  const [interviewerError, setInterviewerError] = useState(false);
-  const interviewerInputRef = useRef<HTMLInputElement>(null);
+  const [interviewerTags, setInterviewerTags] = useState<string[]>([]);
+  const [interviewerTagInput, setInterviewerTagInput] = useState('');
+  const interviewerTagRef = useRef<HTMLInputElement>(null);
+  const interviewDateRef = useRef<HTMLInputElement>(null);
 
-  const addInterviewer = (name: string) => {
+  const addInterviewerTag = (name: string) => {
     const trimmed = name.trim();
-    if (trimmed && !interviewers.includes(trimmed)) {
-      setInterviewers(prev => [...prev, trimmed]);
-      setInterviewerError(false);
+    if (trimmed && !interviewerTags.includes(trimmed)) {
+      setInterviewerTags(prev => [...prev, trimmed]);
     }
-    setInterviewerInput('');
+    setInterviewerTagInput('');
   };
 
-  const removeInterviewer = (index: number) => {
-    setInterviewers(prev => prev.filter((_, i) => i !== index));
+  const removeInterviewerTag = (index: number) => {
+    setInterviewerTags(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleInterviewerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInterviewerTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      addInterviewer(interviewerInput);
-    } else if (e.key === 'Backspace' && interviewerInput === '' && interviewers.length > 0) {
-      setInterviewers(prev => prev.slice(0, -1));
+      addInterviewerTag(interviewerTagInput);
+    } else if (e.key === 'Backspace' && interviewerTagInput === '' && interviewerTags.length > 0) {
+      setInterviewerTags(prev => prev.slice(0, -1));
     }
   };
+
+  // 설정 페이지의 포지션 목록
+  const [positions, setPositions] = useState<Position[]>([]);
+
+  useEffect(() => {
+    fetch('/api/positions')
+      .then(res => res.json())
+      .then((data: Position[]) => setPositions(data))
+      .catch(() => {});
+  }, []);
+
+  // 포지션 선택 시 Hiring Manager 자동 연결
+  const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedPosition = e.target.value;
+    const matched = positions.find(p => p.positionName === selectedPosition);
+    setFormData(prev => ({
+      ...prev,
+      position: selectedPosition,
+      interviewerName: matched?.hiringManager || prev.interviewerName,
+    }));
+  };
+
+  const handleHiringManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const hm = e.target.value;
+    setFormData(prev => ({ ...prev, interviewerName: hm, position: '' }));
+  };
+
+  // 선택된 Hiring Manager 기준으로 포지션 필터
+  const filteredPositions = formData.interviewerName
+    ? positions.filter(p => p.hiringManager === formData.interviewerName)
+    : positions;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -83,15 +121,18 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
 
       if (value.length > 50) {
         const parsed = parseMetadataFromScript(value);
-        // 면접관 이름 자동 파싱 → 태그로 추가
-        if (parsed.interviewerName && interviewers.length === 0) {
-          setInterviewers([parsed.interviewerName]);
-        }
         if (parsed.candidateName && !prev.candidateName) {
           updated.candidateName = parsed.candidateName;
         }
         if (parsed.position && !prev.position) {
-          updated.position = parsed.position;
+          // 파싱된 포지션이 설정에 있으면 매칭
+          const matched = positions.find(p => p.positionName === parsed.position);
+          if (matched) {
+            updated.position = matched.positionName;
+            if (!prev.interviewerName) {
+              updated.interviewerName = matched.hiringManager;
+            }
+          }
         }
       }
 
@@ -99,49 +140,34 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
     });
   };
 
+  const buildSubmitData = (): InterviewInfo | null => {
+    if (!formData.interviewerName) {
+      return null;
+    }
+
+    const finalTags = [...interviewerTags];
+    if (interviewerTagInput.trim()) {
+      finalTags.push(interviewerTagInput.trim());
+    }
+
+    return {
+      ...formData,
+      reportAuthor: finalTags.length > 0 ? finalTags.join(', ') : '',
+    };
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // 입력 중인 이름이 있으면 마지막으로 추가
-    const finalInterviewers = [...interviewers];
-    if (interviewerInput.trim()) {
-      finalInterviewers.push(interviewerInput.trim());
-    }
-
-    if (finalInterviewers.length === 0) {
-      setInterviewerError(true);
-      interviewerInputRef.current?.focus();
-      return;
-    }
-
-    const submitData: InterviewInfo = {
-      ...formData,
-      interviewerName: finalInterviewers.join(', '),
-    };
+    const submitData = buildSubmitData();
+    if (!submitData) return;
     onSubmit(submitData);
   };
 
   const handleDirectSubmit = () => {
-    const finalInterviewers = [...interviewers];
-    if (interviewerInput.trim()) {
-      finalInterviewers.push(interviewerInput.trim());
-    }
-
-    if (finalInterviewers.length === 0) {
-      setInterviewerError(true);
-      interviewerInputRef.current?.focus();
-      return;
-    }
-
-    const submitData: InterviewInfo = {
-      ...formData,
-      interviewerName: finalInterviewers.join(', '),
-    };
+    const submitData = buildSubmitData();
+    if (!submitData) return;
     onDirectSubmit!(submitData);
   };
-
-  const hasScript = formData.tiroScript.trim().length > 0;
-  const isDemoMode = !hasScript || formData.tiroScript.trim().length < 100;
 
   return (
     <form onSubmit={handleSubmit} className="glass-card p-6">
@@ -150,96 +176,31 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         면접 정보 입력
       </h2>
 
-      {/* 면접 정보 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* 면접관 이름 (태그 입력) */}
+      {/* 면접 정보 그리드 — 3열 2줄 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Row 1: Hiring Manager - 포지션 - 면접관 */}
+        {/* Hiring Manager (드롭다운) */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-brand-mid" />
-              면접관 이름 *
+              <UserCheck className="w-4 h-4 text-brand-mid" />
+              Hiring Manager *
             </span>
           </label>
-          <div
-            className={`flex flex-wrap items-center gap-2 px-3 py-2 glass-input cursor-text min-h-[48px] ${
-              interviewerError ? 'ring-2 ring-red-500 border-red-500' : ''
-            }`}
-            onClick={() => interviewerInputRef.current?.focus()}
+          <select
+            value={formData.interviewerName}
+            onChange={handleHiringManagerChange}
+            required
+            className="w-full px-4 py-3 glass-input appearance-none cursor-pointer"
           >
-            {interviewers.map((name, idx) => (
-              <span
-                key={idx}
-                className="flex items-center gap-1 px-2.5 py-1 bg-brand-deep/20 border border-brand-deep/40 text-brand-light rounded-full text-sm font-medium whitespace-nowrap"
-              >
-                {name}
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); removeInterviewer(idx); }}
-                  className="ml-0.5 text-brand-light hover:text-white transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
+            <option value="" className="bg-slate-800">선택해주세요</option>
+            {Array.from(new Set(positions.map(p => p.hiringManager))).map(hm => (
+              <option key={hm} value={hm} className="bg-slate-800">{hm}</option>
             ))}
-            <input
-              ref={interviewerInputRef}
-              type="text"
-              value={interviewerInput}
-              onChange={(e) => { setInterviewerInput(e.target.value); setInterviewerError(false); }}
-              onKeyDown={handleInterviewerKeyDown}
-              onBlur={() => { if (interviewerInput.trim()) addInterviewer(interviewerInput); }}
-              placeholder={interviewers.length === 0 ? '이름 입력 후 Enter' : '+ 추가'}
-              className="flex-1 min-w-[80px] bg-transparent outline-none text-white placeholder-slate-400 text-sm py-1"
-            />
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
-            여러 명일 경우 Enter로 구분해 추가하세요.
-          </p>
-          {interviewerError && (
-            <p className="mt-1 text-xs text-red-400">면접관 이름을 한 명 이상 입력해주세요.</p>
-          )}
+          </select>
         </div>
 
-        {/* 리포트 작성자 */}
-        <div>
-          <label htmlFor="reportAuthor" className="block text-sm font-medium text-slate-300 mb-2">
-            <span className="flex items-center gap-2">
-              <User className="w-4 h-4 text-brand-mid" />
-              리포트 작성자 *
-            </span>
-          </label>
-          <input
-            type="text"
-            id="reportAuthor"
-            name="reportAuthor"
-            value={formData.reportAuthor}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 glass-input"
-            placeholder="김채용"
-          />
-        </div>
-
-        {/* 면접 일자 */}
-        <div>
-          <label htmlFor="interviewDate" className="block text-sm font-medium text-slate-300 mb-2">
-            <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-brand-mid" />
-              면접 일자 *
-            </span>
-          </label>
-          <input
-            type="date"
-            id="interviewDate"
-            name="interviewDate"
-            value={formData.interviewDate}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 glass-input"
-          />
-        </div>
-
-        {/* 지원 포지션 */}
+        {/* 지원 포지션 (드롭다운) */}
         <div>
           <label htmlFor="position" className="block text-sm font-medium text-slate-300 mb-2">
             <span className="flex items-center gap-2">
@@ -247,18 +208,62 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
               지원 포지션 *
             </span>
           </label>
-          <input
-            type="text"
+          <select
             id="position"
             name="position"
             value={formData.position}
-            onChange={handleChange}
+            onChange={handlePositionChange}
             required
-            className="w-full px-4 py-3 glass-input"
-            placeholder="프론트엔드 개발자"
-          />
+            className="w-full px-4 py-3 glass-input appearance-none cursor-pointer"
+          >
+            <option value="" className="bg-slate-800">선택해주세요</option>
+            {filteredPositions.map(p => (
+              <option key={p.id} value={p.positionName} className="bg-slate-800">{p.positionName}</option>
+            ))}
+          </select>
         </div>
 
+        {/* 추가 면접관 (태그 입력) */}
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            <span className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-brand-mid" />
+              추가 면접관
+            </span>
+          </label>
+          <div
+            className="flex flex-wrap items-center gap-2 px-3 py-2 glass-input cursor-text min-h-[48px]"
+            onClick={() => interviewerTagRef.current?.focus()}
+          >
+            {interviewerTags.map((name, idx) => (
+              <span
+                key={idx}
+                className="flex items-center gap-1 px-2.5 py-1 bg-brand-deep/20 border border-brand-deep/40 text-brand-light rounded-full text-sm font-medium whitespace-nowrap"
+              >
+                {name}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeInterviewerTag(idx); }}
+                  className="ml-0.5 text-brand-light hover:text-white transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              ref={interviewerTagRef}
+              type="text"
+              value={interviewerTagInput}
+              onChange={(e) => setInterviewerTagInput(e.target.value)}
+              onKeyDown={handleInterviewerTagKeyDown}
+              onBlur={() => { if (interviewerTagInput.trim()) addInterviewerTag(interviewerTagInput); }}
+              placeholder={interviewerTags.length === 0 ? '이름 입력 후 Enter' : '+ 추가'}
+              className="flex-1 min-w-[80px] bg-transparent outline-none text-white placeholder-slate-400 text-sm py-1"
+            />
+          </div>
+        </div>
+
+        {/* Row 2: 지원자 이름 - 인터뷰 차수 - 면접 일자 */}
         {/* 지원자 이름 */}
         <div>
           <label htmlFor="candidateName" className="block text-sm font-medium text-slate-300 mb-2">
@@ -297,17 +302,57 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
           >
             <option value="1차" className="bg-slate-800">1차</option>
             <option value="2차" className="bg-slate-800">2차</option>
+            <option value="1+2차" className="bg-slate-800">1+2차</option>
+            <option value="커피챗" className="bg-slate-800">커피챗</option>
             <option value="기타" className="bg-slate-800">기타</option>
           </select>
+        </div>
+
+        {/* 면접 일자 */}
+        <div>
+          <label htmlFor="interviewDate" className="block text-sm font-medium text-slate-300 mb-2">
+            <span className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-brand-mid" />
+              면접 일자 *
+            </span>
+          </label>
+          <div
+            className="relative cursor-pointer"
+            onClick={() => interviewDateRef.current?.showPicker()}
+          >
+            <input
+              ref={interviewDateRef}
+              type="datetime-local"
+              id="interviewDate"
+              name="interviewDate"
+              value={formData.interviewDate}
+              onChange={handleChange}
+              step="900"
+              required
+              className="w-full px-4 py-3 glass-input cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 
       {/* Tiro 스크립트 */}
       <div className="mb-6">
         <label htmlFor="tiroScript" className="block text-sm font-medium text-slate-300 mb-2">
-          <span className="flex items-center gap-2">
-            <ClipboardPaste className="w-4 h-4 text-brand-mid" />
-            Tiro 면접 스크립트
+          <span className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <ClipboardPaste className="w-4 h-4 text-brand-mid" />
+              Tiro 면접 스크립트
+            </span>
+            <a
+              href="https://tiro.ooo/n"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-brand-light hover:text-white bg-brand-deep/20 hover:bg-brand-deep/40 border border-brand-deep/30 rounded-lg transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Tiro 열기
+            </a>
           </span>
         </label>
         <div className="mb-2 p-3 bg-brand-deep/15 border border-brand-deep/30 rounded-lg">
@@ -330,23 +375,8 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         </p>
       </div>
 
-      {/* 데모 모드 안내 */}
-      {isDemoMode && (
-        <div className="mb-6 p-4 rounded-lg bg-brand-deep/15 border border-brand-deep/30">
-          <div className="flex items-start gap-3">
-            <Wand2 className="w-5 h-5 text-brand-mid shrink-0 mt-0.5" />
-            <div>
-              <p className="text-brand-light text-sm font-medium">데모 모드로 실행됩니다</p>
-              <p className="text-brand-light/70 text-xs mt-1">
-                Tiro 스크립트가 입력되지 않아 AI가 가상의 현실적인 면접 시나리오를 생성하여 평가합니다.
-                실제 면접 스크립트를 입력하면 더 정확한 평가를 받을 수 있습니다.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="space-y-3">
+        {/* 메인 버튼: 항상 Q&A 정리 후 평가 */}
         <button
           type="submit"
           disabled={isLoading}
@@ -361,32 +391,28 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
               <Sparkles className="w-5 h-5 animate-pulse" />
               처리 중...
             </>
-          ) : isDemoMode ? (
-            <>
-              <Sparkles className="w-5 h-5" />
-              데모 보고서 생성
-            </>
           ) : (
             <>
               <MessageSquare className="w-5 h-5" />
-              1단계: 스크립트 Q&A 정리 후 평가
+              스크립트 Q&A 정리 후 평가
             </>
           )}
         </button>
 
-        {!isDemoMode && onDirectSubmit && (
+        {/* 보조 버튼: 녹음이 안 된 경우 면접관 소견만 작성 */}
+        {onDirectSubmit && (
           <button
             type="button"
             disabled={isLoading}
             onClick={handleDirectSubmit}
-            className={`w-full py-3 px-6 rounded-xl font-medium text-slate-300 transition-all duration-300 flex items-center justify-center gap-3 ${
+            className={`w-full py-3 px-6 rounded-xl font-medium text-slate-400 transition-all duration-300 flex items-center justify-center gap-3 ${
               isLoading
                 ? 'bg-slate-700 cursor-not-allowed'
                 : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            Q&A 정리 없이 바로 평가 (빠름)
+            <PenLine className="w-4 h-4" />
+            녹음이 안 된 경우, 면접관 소견만 작성
           </button>
         )}
       </div>

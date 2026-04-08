@@ -49,10 +49,10 @@ export default function CopyButton({ report }: CopyButtonProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-purple-500/20"
+        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 shadow-lg shadow-emerald-500/20"
       >
         <Copy className="w-5 h-5" />
-        공유
+        로그 & 결과 공유
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -73,8 +73,8 @@ export default function CopyButton({ report }: CopyButtonProps) {
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-5 h-5 text-cyan-400" />
                   <div>
-                    <div className="font-medium text-white">요약 형식</div>
-                    <div className="text-xs text-slate-400">기본정보·평가 요약·링크 포함</div>
+                    <div className="font-medium text-white">로그 & 결과</div>
+                    <div className="text-xs text-slate-400">기본정보·최종의견·소견·링크</div>
                   </div>
                 </div>
                 {copiedFormat === 'summary' && (

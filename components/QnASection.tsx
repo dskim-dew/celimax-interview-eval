@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
-import { QnAData } from '@/lib/types';
+import { QnAData, QNA_TOPIC_ORDER, QnATopicCategory } from '@/lib/types';
 import Linkify from './Linkify';
 
 interface QnASectionProps {
@@ -28,12 +28,6 @@ export default function QnASection({
 
   return (
     <div className="space-y-4">
-      {/* 메타 정보 */}
-      <div className="flex flex-wrap gap-4 text-sm text-slate-300 p-3 bg-brand-deep/10 rounded-lg border border-brand-deep/30">
-        <span>총 질문: {qnaData.metadata.totalQuestions}개</span>
-        <span>주요 주제: {qnaData.metadata.mainTopics.join(', ')}</span>
-      </div>
-
       {/* 토픽 필터 */}
       <div className="flex flex-wrap gap-2">
         <button
@@ -46,22 +40,27 @@ export default function QnASection({
         >
           전체 ({qnaData.metadata.totalQuestions})
         </button>
-        {qnaData.metadata.mainTopics.map(topic => {
-          const count = qnaData.qna.filter(q => q.topic === topic).length;
-          return (
-            <button
-              key={topic}
-              onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                topicFilter === topic
-                  ? 'bg-brand-deep/30 text-brand-light border border-brand-deep/40'
-                  : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
-              }`}
-            >
-              {topic} ({count})
-            </button>
-          );
-        })}
+        {(() => {
+          const allTopics = Array.from(new Set(qnaData.qna.map(q => q.topic)));
+          const ordered = QNA_TOPIC_ORDER.filter(t => allTopics.includes(t));
+          const extra = allTopics.filter(t => !(QNA_TOPIC_ORDER as string[]).includes(t));
+          return [...ordered, ...extra].map(topic => {
+            const count = qnaData.qna.filter(q => q.topic === topic).length;
+            return (
+              <button
+                key={topic}
+                onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  topicFilter === topic
+                    ? 'bg-brand-deep/30 text-brand-light border border-brand-deep/40'
+                    : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
+                }`}
+              >
+                {topic} ({count})
+              </button>
+            );
+          });
+        })()}
       </div>
 
       {/* Q&A 목록 */}

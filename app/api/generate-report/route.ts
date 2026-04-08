@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { InterviewInfo, QnAData } from '@/lib/types';
-import { buildEvaluationPrompt, buildDemoPrompt, buildEvaluationFromQnAPrompt } from '@/lib/prompt';
+import { buildEvaluationPrompt, buildEvaluationFromQnAPrompt } from '@/lib/prompt';
 import { createSSEStream, estimateTokens } from '@/lib/ai-client';
 
 export async function POST(request: NextRequest) {
@@ -23,21 +23,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const scriptLength = (interviewInfo.tiroScript || '').trim().length;
-    const transcriptLength = (interviewInfo.transcript || '').trim().length;
-    const isDemoMode = !qnaData && scriptLength < 100 && transcriptLength < 100;
-
     let prompt: string;
     if (qnaData) {
       prompt = buildEvaluationFromQnAPrompt(interviewInfo, qnaData);
-    } else if (isDemoMode) {
-      prompt = buildDemoPrompt(interviewInfo);
     } else {
       prompt = buildEvaluationPrompt(interviewInfo);
     }
 
     const inputTokens = estimateTokens(prompt);
-    console.log(`[Report] 예상 입력 토큰: ~${inputTokens}, 모드: ${isDemoMode ? '데모' : qnaData ? 'Q&A기반' : '직접'}`);
+    console.log(`[Report] 예상 입력 토큰: ~${inputTokens}, 모드: ${qnaData ? 'Q&A기반' : '직접'}`);
 
     const stream = createSSEStream(prompt, {
       model: 'claude-haiku-4-5-20251001',

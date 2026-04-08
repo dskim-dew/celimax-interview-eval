@@ -93,11 +93,12 @@ function fromDbRecord(record: InterviewReport): EvaluationReport {
       tiroScript: record.tiroScript,
       transcript: record.transcript ?? undefined,
     },
-    values: migrateValues(parseJson(record.values)),
-    competencies: migrateCompetencies(parseJson(record.competencies)),
-    overall: migrateOverall(parseJson(record.overall)),
+    values: record.values ? migrateValues(parseJson(record.values)) : undefined,
+    competencies: record.competencies ? migrateCompetencies(parseJson(record.competencies)) : undefined,
+    overall: record.overall ? migrateOverall(parseJson(record.overall)) : undefined,
     interviewerNotes: migrateNotes(parseJson(record.interviewerNotes)),
     qnaData: parseJson<QnAData>(record.qnaData),
+    ceoDecision: (record.ceoDecision as EvaluationReport['ceoDecision']) ?? null,
   }
 }
 
@@ -112,11 +113,12 @@ function toDbInput(report: EvaluationReport) {
     reportAuthor: report.interviewInfo.reportAuthor ?? '',
     tiroScript: report.interviewInfo.tiroScript,
     transcript: report.interviewInfo.transcript ?? null,
-    qnaData: report.qnaData ? JSON.parse(JSON.stringify(report.qnaData)) : Prisma.DbNull,
-    values: JSON.parse(JSON.stringify(report.values)),
-    competencies: JSON.parse(JSON.stringify(report.competencies)),
-    overall: JSON.parse(JSON.stringify(report.overall)),
-    interviewerNotes: JSON.parse(JSON.stringify(report.interviewerNotes)),
+    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : null,
+    values: report.values ? JSON.stringify(report.values) : null,
+    competencies: report.competencies ? JSON.stringify(report.competencies) : null,
+    overall: report.overall ? JSON.stringify(report.overall) : null,
+    interviewerNotes: JSON.stringify(report.interviewerNotes),
+    ceoDecision: report.ceoDecision ?? null,
   }
 }
 

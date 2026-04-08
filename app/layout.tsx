@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Header from "@/components/Header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Celi Hire",
+  title: "Celi-Hire",
   description: "AI 기반 면접 분석 리포트",
   icons: { icon: "/logo.png" },
 };
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Header />
           {children}
         </main>
       </body>

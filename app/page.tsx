@@ -3,9 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link';
-import Image from 'next/image';
-import { FileText, FolderOpen, Plus, AlertCircle, RefreshCw, Info, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { FileText, Plus, AlertCircle, RefreshCw, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
 import InterviewForm from '@/components/InterviewForm';
 import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
@@ -80,7 +78,6 @@ export default function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [savedReportsCount, setSavedReportsCount] = useState(0);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // 2단계 프로세스 상태
   const [qnaData, setQnaData] = useState<QnAData | null>(null);
@@ -121,7 +118,7 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  // 1단계: Q&A 정리 또는 데모 모드 직행
+  // 1단계: Q&A 정리
   const handleSubmit = async (interviewInfo: InterviewInfo) => {
     if (cooldownSec > 0) {
       setError(`API 쿨다운 중입니다. ${cooldownSec}초 후에 다시 시도해주세요.`);
@@ -129,7 +126,6 @@ export default function Home() {
     }
     setError(null);
     setReport(null);
-    setIsDemoMode(false);
     setCurrentInterviewInfo(interviewInfo);
 
     const submitData = { ...interviewInfo };
@@ -137,17 +133,6 @@ export default function Home() {
       submitData.transcript = interviewInfo.tiroScript;
     }
     setCurrentInterviewInfo(submitData);
-
-    const scriptLength = (submitData.tiroScript || '').trim().length;
-    const transcriptLength = (submitData.transcript || '').trim().length;
-    const isDemo = scriptLength < 100 && transcriptLength < 100;
-
-    if (isDemo) {
-      setIsDemoMode(true);
-      setQnaData(null);
-      await generateEvaluationDirect(submitData);
-      return;
-    }
 
     setQnaLoading(true);
     setQnaData(null);
@@ -237,7 +222,7 @@ export default function Home() {
     }
   };
 
-  // 데모 모드: Q&A 없이 직접 평가 생성
+  // Q&A 없이 직접 평가 생성 (빠른 모드)
   const generateEvaluationDirect = async (interviewInfo: InterviewInfo) => {
     setEvaluationLoading(true);
     setError(null);
@@ -318,14 +303,31 @@ export default function Home() {
   };
 
 
-  // Q&A 없이 바로 평가 (빠른 모드)
+  // Q&A 없이 바로 평가 또는 면접관 소견만 작성
   const handleDirectSubmit = async (interviewInfo: InterviewInfo) => {
     setError(null);
     setReport(null);
     setQnaData(null);
-    setIsDemoMode(false);
     setCurrentInterviewInfo(interviewInfo);
-    await generateEvaluationDirect(interviewInfo);
+
+    const hasScript = (interviewInfo.tiroScript || '').trim().length > 0;
+
+    if (!hasScript) {
+      // 스크립트 없음: AI 분석 없이 면접관 소견만 작성
+      const now = new Date().toISOString();
+      const newReport: ReportType = {
+        id: uuidv4(),
+        createdAt: now,
+        updatedAt: now,
+        interviewInfo,
+        interviewerNotes: { ...EMPTY_NOTES },
+      };
+      setReport(newReport);
+      setActiveTab('evaluation');
+    } else {
+      // 스크립트 있음: AI 직접 평가
+      await generateEvaluationDirect(interviewInfo);
+    }
   };
 
   const handleNewReport = () => {
@@ -333,7 +335,6 @@ export default function Home() {
     setQnaData(null);
     setCurrentInterviewInfo(null);
     setError(null);
-    setIsDemoMode(false);
     setActiveTab('qna');
   };
 
@@ -344,43 +345,18 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Celi Hire"
-            width={44}
-            height={44}
-            className="rounded-xl"
-          />
-          <div>
-            <h1 className="text-2xl font-bold gradient-text">Celi Hire</h1>
-            <p className="text-sm text-slate-400">셀리맥스 면접 리포트</p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          {(report || qnaData) && (
-            <button
-              onClick={handleNewReport}
-              className="flex items-center gap-2 px-4 py-2 glass-button rounded-lg text-white hover:scale-105 transition-transform"
-            >
-              <Plus className="w-4 h-4" />
-              새 보고서 작성
-            </button>
-          )}
-          <Link
-            href="/history"
-            className="flex items-center gap-2 px-4 py-2 glass-button text-white rounded-lg hover:scale-105 transition-transform"
+      {/* 새 보고서 작성 버튼 (리포트 진행 중일 때만) */}
+      {(report || qnaData) && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleNewReport}
+            className="flex items-center gap-2 px-4 py-2 glass-button rounded-lg text-white hover:scale-105 transition-transform"
           >
-            <FolderOpen className="w-4 h-4" />
-            저장된 보고서
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/20">
-              {savedReportsCount}개
-            </span>
-          </Link>
+            <Plus className="w-4 h-4" />
+            새 보고서 작성
+          </button>
         </div>
-      </div>
+      )}
 
       {/* 메인 콘텐츠: 입력 폼 */}
       {!report && !qnaData && !isAnyLoading && (
@@ -434,22 +410,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 데모 모드 알림 */}
-      {report && isDemoMode && (
-        <div className="glass-card p-4 border-brand-deep/30 bg-brand-deep/15">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-brand-mid shrink-0 mt-0.5" />
-            <div>
-              <p className="text-brand-light text-sm font-medium mb-1">데모 모드</p>
-              <p className="text-brand-light/70 text-sm">
-                면접 내용(Transcript)이 제공되지 않아 AI가 가상의 현실적인 면접 시나리오를 생성하여 평가했습니다.
-                실제 면접 내용을 입력하면 더 정확한 평가를 받을 수 있습니다.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 탭 컨테이너 */}
       {showTabs && (
         <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
@@ -467,7 +427,7 @@ export default function Home() {
               >
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <MessageSquare className="w-5 h-5" />
-                  <span>면접 Q&A</span>
+                  <span>Q&A 스크립트</span>
                   <CheckCircle2 className="w-4 h-4 text-green-400 ml-1" />
                 </div>
               </button>
@@ -519,40 +479,12 @@ export default function Home() {
                   onNotesChange={handleNotesChange}
                   onSave={handleSave}
                   isSaving={isSaving}
+                  qnaData={qnaData ?? undefined}
                 />
-
-                {/* Q&A로 돌아가기 버튼 */}
-                {qnaData && (
-                  <div className="mt-6 p-4 bg-brand-deep/10 rounded-lg border border-brand-deep/30">
-                    <p className="text-brand-light mb-3 text-sm">원본 면접 Q&A를 다시 확인하고 싶으신가요?</p>
-                    <button
-                      onClick={() => setActiveTab('qna')}
-                      className="px-6 py-3 bg-brand-deep hover:bg-brand-deep text-white rounded-lg transition flex items-center gap-2"
-                    >
-                      <MessageSquare className="w-5 h-5" />
-                      Q&A 보기
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* 데모 모드: Q&A 없이 평가표만 (탭 없이 바로 표시) */}
-            {activeTab === 'evaluation' && report && !qnaData && isDemoMode && null}
           </div>
-        </div>
-      )}
-
-      {/* 데모 모드에서 Q&A 없이 평가표만 있는 경우 (탭 컨테이너 없이) */}
-      {report && !qnaData && !showTabs && !isAnyLoading && (
-        <div className="space-y-6">
-          <EvaluationReport
-            report={report}
-            onNotesChange={handleNotesChange}
-            onSave={handleSave}
-            isSaving={isSaving}
-          />
-
         </div>
       )}
 

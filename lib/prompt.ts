@@ -67,7 +67,7 @@ ${trimmedScript}
 ${trimmedTranscript}`;
   }
 
-  return `면접 스크립트를 분석하여 Celi Hire 평가표 기준으로 JSON 생성.
+  return `면접 스크립트를 분석하여 Celi-Hire 평가표 기준으로 JSON 생성.
 
 **면접 정보:**
 면접관: ${interviewInfo.interviewerName}
@@ -98,12 +98,18 @@ ${scriptText}
 
 **정리 규칙:**
 - 면접관의 질문과 지원자의 답변을 명확히 구분
-- 추임새(음, 어, 네 등) 제거, 불완전한 문장은 완성
+- 추임새(음, 어, 네 등)와 불필요한 반복만 제거, 불완전한 문장은 완성
 - 스크립트에 등장하는 **모든 질문을 빠짐없이** 포함 (중요도와 무관하게 전부)
 - 꼬리질문도 별도 Q&A로 분리
 - 질문은 원문 의도를 그대로 유지
-- **답변은 핵심 내용 + 주요 사례 포함하여 2-4문장으로 요약** (과도한 축약 지양)
+- **답변은 말더듬·반복만 제거하고, 핵심 내용·구체적 사례·맥락은 모두 보존. 길이 제한 없음** (면접 진행 방식을 파악할 수 있도록 최대한 원문에 가깝게 유지)
 - **출력이 길어질 경우 미완성 JSON을 출력하지 말고, 현재까지 완성된 Q&A만으로 JSON 배열을 닫고 metadata까지 반드시 출력** (불완전한 JSON 절대 금지)
+
+**토픽 분류 (반드시 아래 4개 중 하나):**
+- "가치관": 조직 문화 적합성, 팀워크, 업무 스타일, 갈등 해결, 협업 태도
+- "역량": 직무 전문성, 기술 역량, 문제 해결력, 프로젝트 경험, 커뮤니케이션
+- "동기/지원배경": 지원 동기, 커리어 목표, 회사 선택 기준, 이직 사유
+- "기타": 자기소개, 연봉, 입사 가능 시기, 아이스브레이킹 등 위에 해당하지 않는 질문
 
 **출력: JSON만, {로 시작 }로 끝, 코드블록/설명문 없이.**
 {
@@ -111,13 +117,13 @@ ${scriptText}
     {
       "id": 1,
       "question": "질문 원문 (추임새만 제거)",
-      "answer": "답변 요약 2-4문장",
-      "topic": "주제"
+      "answer": "답변 원문 정리 (말더듬·반복만 제거, 내용 보존)",
+      "topic": "가치관" | "역량" | "동기/지원배경" | "기타"
     }
   ],
   "metadata": {
     "totalQuestions": 10,
-    "mainTopics": ["경력", "프로젝트", "가치관"]
+    "mainTopics": ["가치관", "역량", "동기/지원배경"]
   }
 }`;
 }
@@ -128,7 +134,7 @@ export function buildEvaluationFromQnAPrompt(interviewInfo: InterviewInfo, qnaDa
     `Q${item.id}. [${item.topic}] ${item.question}\nA. ${item.answer}`
   ).join('\n\n');
 
-  return `정리된 면접 Q&A를 분석하여 Celi Hire 평가표 기준으로 JSON 생성.
+  return `정리된 면접 Q&A를 분석하여 Celi-Hire 평가표 기준으로 JSON 생성.
 
 **면접 정보:**
 면접관: ${interviewInfo.interviewerName}
@@ -150,25 +156,3 @@ ${JSON_RULES}
 ${OUTPUT_SCHEMA}`;
 }
 
-// 데모 모드 프롬프트
-export function buildDemoPrompt(interviewInfo: InterviewInfo): string {
-  return `데모 모드: 가상의 현실적 면접 시나리오를 상상하여 Celi Hire 평가표 JSON 생성.
-
-**면접 정보:**
-면접관: ${interviewInfo.interviewerName}
-포지션: ${interviewInfo.position}
-지원자: ${interviewInfo.candidateName}
-면접일: ${interviewInfo.interviewDate}
-인터뷰 차수: ${interviewInfo.interviewRound ?? '-'}
-${interviewInfo.tiroScript ? `\n**참조 스크립트:**\n${interviewInfo.tiroScript}` : ''}
-${interviewInfo.transcript ? `\n**참조 메모:**\n${interviewInfo.transcript}` : ''}
-
-**시나리오 규칙:** ${interviewInfo.position} 포지션 경력 2-5년차 현실적 지원자 상상. 최소 1-2개 우려사항 포함. 강점과 리스크 모두 균형있게 포함.
-
-${CRITERIA}
-
-${FIELD_RULES}
-
-${JSON_RULES}
-${OUTPUT_SCHEMA}`;
-}

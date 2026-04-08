@@ -10,6 +10,7 @@ interface InterviewerCommentProps {
   onChange: (notes: InterviewerNotes) => void;
   readOnly?: boolean;
   finalDecisionReadOnly?: boolean;
+  decisionFirst?: boolean;
 }
 
 function handleBulletKeyDown(
@@ -128,80 +129,101 @@ const DECISIONS: { value: FinalDecision; label: string; activeClass: string; dim
   },
 ];
 
-export default function InterviewerComment({ notes, onChange, readOnly = false, finalDecisionReadOnly = false }: InterviewerCommentProps) {
+export default function InterviewerComment({ notes, onChange, readOnly = false, finalDecisionReadOnly = false, decisionFirst = false }: InterviewerCommentProps) {
   const selected = notes.finalDecision ?? null;
+
+  const commentBlock = readOnly ? (
+    <div className="bg-slate-800/30 border border-slate-600/30 rounded-lg p-5">
+      <div className="text-slate-300 min-h-[48px] text-sm leading-relaxed">
+        {notes.comment
+          ? <RenderedComment text={notes.comment} />
+          : <span className="text-slate-500">작성된 내용이 없습니다.</span>
+        }
+      </div>
+    </div>
+  ) : (
+    <div>
+      <p className="text-xs text-slate-400 mb-2">
+        면접에서 느낀 점을 간략히 작성해주세요. (3~5줄 권장, <code className="text-slate-300">- </code> 입력 시 불렛 목록)
+      </p>
+      <textarea
+        value={notes.comment}
+        onChange={(e) => onChange({ ...notes, comment: e.target.value })}
+        onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
+        placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
+        rows={5}
+        className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition resize-none text-sm font-mono"
+      />
+    </div>
+  );
+
+  const decisionBlock = (
+    <div className={decisionFirst ? '' : 'pt-2'}>
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="text-base font-semibold text-white">최종 의견</h3>
+        {!selected && !readOnly && (
+          <span className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">필수</span>
+        )}
+        {selected && (
+          <span className="text-xs text-slate-400">선택됨</span>
+        )}
+      </div>
+      <div className={`grid gap-2 ${decisionFirst ? 'grid-cols-1 w-36' : 'grid-cols-3 gap-3'}`}>
+        {DECISIONS.map(({ value, label, activeClass, dimClass }) => {
+          const isSelected = selected === value;
+          const isDimmed = selected !== null && !isSelected;
+
+          return (
+            <button
+              key={value}
+              onClick={() => !readOnly && !finalDecisionReadOnly && onChange({ ...notes, finalDecision: isSelected ? null : value })}
+              disabled={readOnly || finalDecisionReadOnly}
+              className={`py-3 rounded-xl font-bold text-sm border-2 transition-all duration-200 ${
+                isSelected
+                  ? activeClass
+                  : isDimmed
+                    ? dimClass
+                    : 'bg-white/5 text-slate-300 border-white/15 hover:bg-white/10 hover:border-white/25'
+              } ${readOnly || finalDecisionReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const selectedDecision = DECISIONS.find(d => d.value === selected);
 
   return (
     <div className="glass-card overflow-hidden">
       <div className="bg-gradient-to-r from-brand-dark/80 to-brand-deep/20 p-4 border-b border-white/10">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-brand-mid" />
-          면접관 소견
+          Hiring Manager 소견
+          {decisionFirst && selectedDecision && (
+            <span className={`ml-2 px-3 py-1 rounded-lg text-sm font-bold ${selectedDecision.activeClass}`}>
+              {selectedDecision.label}
+            </span>
+          )}
+          {decisionFirst && !selectedDecision && !readOnly && (
+            <span className="ml-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">미선택</span>
+          )}
         </h2>
       </div>
 
-      <div className="p-4 space-y-4">
-        {readOnly ? (
-          <div className="bg-slate-800/30 border border-slate-600/30 rounded-lg p-5">
-            <div className="text-slate-300 min-h-[48px] text-sm leading-relaxed">
-              {notes.comment
-                ? <RenderedComment text={notes.comment} />
-                : <span className="text-slate-500">작성된 내용이 없습니다.</span>
-              }
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p className="text-xs text-slate-400 mb-2">
-              면접에서 느낀 점을 간략히 작성해주세요. (3~5줄 권장, <code className="text-slate-300">- </code> 입력 시 불렛 목록)
-            </p>
-            <textarea
-              value={notes.comment}
-              onChange={(e) => onChange({ ...notes, comment: e.target.value })}
-              onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
-              placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
-              rows={5}
-              className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition resize-none text-sm font-mono"
-            />
-          </div>
-        )}
-
-        {/* 최종 의견 선택 */}
-        <div className="pt-2">
-          <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-base font-semibold text-white">최종 의견</h3>
-            {!selected && !readOnly && (
-              <span className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">필수</span>
-            )}
-            {selected && (
-              <span className="text-xs text-slate-400">선택됨</span>
-            )}
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {DECISIONS.map(({ value, label, activeClass, dimClass }) => {
-              const isSelected = selected === value;
-              const isDimmed = selected !== null && !isSelected;
-
-              return (
-                <button
-                  key={value}
-                  onClick={() => !readOnly && !finalDecisionReadOnly && onChange({ ...notes, finalDecision: isSelected ? null : value })}
-                  disabled={readOnly || finalDecisionReadOnly}
-                  className={`py-3 rounded-xl font-bold text-sm border-2 transition-all duration-200 ${
-                    isSelected
-                      ? activeClass
-                      : isDimmed
-                        ? dimClass
-                        : 'bg-white/5 text-slate-300 border-white/15 hover:bg-white/10 hover:border-white/25'
-                  } ${readOnly || finalDecisionReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+      {decisionFirst ? (
+        <div className="p-4 space-y-4">
+          {commentBlock}
+          {!readOnly && decisionBlock}
         </div>
-      </div>
+      ) : (
+        <div className="p-4 space-y-4">
+          {commentBlock}
+          {decisionBlock}
+        </div>
+      )}
     </div>
   );
 }
