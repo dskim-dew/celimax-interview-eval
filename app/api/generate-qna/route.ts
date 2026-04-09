@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log(`[Q&A] 예상 입력 토큰: ~${inputTokens}`);
 
     const stream = createSSEStream(prompt, {
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-20250514',
       maxTokens: 16384,
       temperature: 0.2,
       maxRetries: 3,
