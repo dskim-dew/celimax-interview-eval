@@ -25,6 +25,7 @@ model InterviewReport {
   values           Json?
   competencies     Json?
   overall          Json?
+  immersion        Json?
   interviewerNotes Json?    @map("interviewer_notes")
   ceoDecision      String?  @map("ceo_decision")
   createdAt        DateTime @default(now()) @map("created_at")

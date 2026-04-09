@@ -47,7 +47,15 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
     position: '',
     candidateName: '',
     tiroScript: '',
-    interviewDate: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
+    interviewDate: (() => {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      const minutes = d.getMinutes();
+      const rounded = Math.round(minutes / 15) * 15;
+      d.setMinutes(rounded >= 60 ? 0 : rounded);
+      if (rounded >= 60) d.setHours(d.getHours() + 1);
+      return d.toISOString().slice(0, 16).replace('T', ' ');
+    })(),
     interviewRound: '1차',
   });
 
@@ -56,6 +64,16 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
   const [interviewerTagInput, setInterviewerTagInput] = useState('');
   const interviewerTagRef = useRef<HTMLInputElement>(null);
   const interviewDateRef = useRef<HTMLInputElement>(null);
+
+  // 면접 일자: date와 time을 분리하여 관리
+  const interviewDateValue = formData.interviewDate.slice(0, 10); // YYYY-MM-DD
+  const interviewHour = formData.interviewDate.slice(11, 13) || '09';
+  const interviewMinute = formData.interviewDate.slice(14, 16) || '00';
+
+  const handleDatePartChange = (date: string, hour: string, minute: string) => {
+    const combined = `${date} ${hour}:${minute}`;
+    setFormData(prev => ({ ...prev, interviewDate: combined }));
+  };
 
   const addInterviewerTag = (name: string) => {
     const trimmed = name.trim();
@@ -316,21 +334,39 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
               면접 일자 *
             </span>
           </label>
-          <div
-            className="relative cursor-pointer"
-            onClick={() => interviewDateRef.current?.showPicker()}
-          >
-            <input
-              ref={interviewDateRef}
-              type="datetime-local"
-              id="interviewDate"
-              name="interviewDate"
-              value={formData.interviewDate}
-              onChange={handleChange}
-              step="900"
-              required
-              className="w-full px-4 py-3 glass-input cursor-pointer"
-            />
+          <div className="flex gap-2">
+            <div
+              className="flex-1 relative cursor-pointer"
+              onClick={() => interviewDateRef.current?.showPicker()}
+            >
+              <input
+                ref={interviewDateRef}
+                type="date"
+                id="interviewDate"
+                value={interviewDateValue}
+                onChange={(e) => handleDatePartChange(e.target.value, interviewHour, interviewMinute)}
+                required
+                className="w-full px-4 py-3 glass-input cursor-pointer"
+              />
+            </div>
+            <select
+              value={interviewHour}
+              onChange={(e) => handleDatePartChange(interviewDateValue, e.target.value, interviewMinute)}
+              className="w-20 px-2 py-3 glass-input cursor-pointer text-center"
+            >
+              {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+                <option key={h} value={h}>{h}시</option>
+              ))}
+            </select>
+            <select
+              value={interviewMinute}
+              onChange={(e) => handleDatePartChange(interviewDateValue, interviewHour, e.target.value)}
+              className="w-20 px-2 py-3 glass-input cursor-pointer text-center"
+            >
+              {['00', '15', '30', '45'].map(m => (
+                <option key={m} value={m}>{m}분</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

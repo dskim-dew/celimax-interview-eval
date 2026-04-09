@@ -6,6 +6,7 @@ import type {
   InterviewRound,
   ValuesEvaluation,
   CompetenciesEvaluation,
+  ValueEvaluation,
   OverallEvaluation,
   InterviewerNotes,
   QnAData,
@@ -44,21 +45,36 @@ function migrateNotes(raw: any): InterviewerNotes {
   }
 }
 
+// 새 가치관 5개 키 (altruistic, immersed 제외)
+const VALID_VALUE_KEYS = ['honest', 'optimistic', 'proactive', 'growth', 'respect']
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateEvalItem(v: any) {
+  return {
+    evidence: v.evidence ?? [],
+    specificCase: v.specificCase ?? '',
+    concerns: v.concerns ?? [],
+    summary: v.summary ?? '',
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function migrateValues(raw: any): ValuesEvaluation {
   if (!raw) return {} as ValuesEvaluation
   const result: Record<string, unknown> = {}
   for (const [key, val] of Object.entries(raw)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const v = val as any
-    result[key] = {
-      evidence: v.evidence ?? [],
-      specificCase: v.specificCase ?? '',
-      concerns: v.concerns ?? [],
-      summary: v.summary ?? '',
+    if (VALID_VALUE_KEYS.includes(key)) {
+      result[key] = migrateEvalItem(val)
     }
   }
   return result as unknown as ValuesEvaluation
+}
+
+// 기존 values JSON에서 immersed 데이터를 immersion으로 추출
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractImmersionFromValues(raw: any): ValueEvaluation | undefined {
+  if (!raw?.immersed) return undefined
+  return migrateEvalItem(raw.immersed) as ValueEvaluation
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,16 +82,15 @@ function migrateCompetencies(raw: any): CompetenciesEvaluation {
   if (!raw) return {} as CompetenciesEvaluation
   const result: Record<string, unknown> = {}
   for (const [key, val] of Object.entries(raw)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const v = val as any
-    result[key] = {
-      evidence: v.evidence ?? [],
-      specificCase: v.specificCase ?? '',
-      concerns: v.concerns ?? [],
-      summary: v.summary ?? '',
-    }
+    result[key] = migrateEvalItem(val)
   }
   return result as unknown as CompetenciesEvaluation
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateImmersion(raw: any): ValueEvaluation | undefined {
+  if (!raw) return undefined
+  return migrateEvalItem(raw) as ValueEvaluation
 }
 
 function fromDbRecord(record: InterviewReport): EvaluationReport {
@@ -95,6 +110,11 @@ function fromDbRecord(record: InterviewReport): EvaluationReport {
     },
     values: record.values ? migrateValues(parseJson(record.values)) : undefined,
     competencies: record.competencies ? migrateCompetencies(parseJson(record.competencies)) : undefined,
+    immersion: record.immersion
+      ? migrateImmersion(parseJson(record.immersion))
+      : record.values
+        ? extractImmersionFromValues(parseJson(record.values))
+        : undefined,
     overall: record.overall ? migrateOverall(parseJson(record.overall)) : undefined,
     interviewerNotes: migrateNotes(parseJson(record.interviewerNotes)),
     qnaData: parseJson<QnAData>(record.qnaData),
@@ -113,10 +133,11 @@ function toDbInput(report: EvaluationReport) {
     reportAuthor: report.interviewInfo.reportAuthor ?? '',
     tiroScript: report.interviewInfo.tiroScript,
     transcript: report.interviewInfo.transcript ?? null,
-    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : Prisma.DbNull,
-    values: report.values ? JSON.stringify(report.values) : Prisma.DbNull,
-    competencies: report.competencies ? JSON.stringify(report.competencies) : Prisma.DbNull,
-    overall: report.overall ? JSON.stringify(report.overall) : Prisma.DbNull,
+    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : null,
+    values: report.values ? JSON.stringify(report.values) : null,
+    competencies: report.competencies ? JSON.stringify(report.competencies) : null,
+    immersion: report.immersion ? JSON.stringify(report.immersion) : null,
+    overall: report.overall ? JSON.stringify(report.overall) : null,
     interviewerNotes: JSON.stringify(report.interviewerNotes),
     ceoDecision: report.ceoDecision ?? null,
   }

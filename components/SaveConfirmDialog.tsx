@@ -51,7 +51,7 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
               </span>
               <span className="flex items-center gap-2 text-slate-300">
                 <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                {report.interviewInfo.interviewDate}
+                {report.interviewInfo.interviewDate.replace('T', ' ')}
               </span>
               <span className="flex items-center gap-2 text-slate-300">
                 <Hash className="w-3.5 h-3.5 text-blue-400" />
@@ -102,11 +102,19 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
           </div>
 
           {/* 경고 메시지 */}
-          {hasMissing && (
+          {!hasComment && (
+            <div className="flex items-start gap-3 px-4 py-3 bg-red-500/10 border border-red-500/25 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-300">
+                면접관 소견을 작성해야 저장할 수 있습니다.
+              </p>
+            </div>
+          )}
+          {hasComment && !hasDecision && (
             <div className="flex items-start gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/25 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-sm text-amber-300">
-                미작성 항목이 있습니다. 그래도 저장하시겠습니까?
+                최종 의견이 미선택입니다. 그래도 저장하시겠습니까?
               </p>
             </div>
           )}
@@ -122,9 +130,9 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
           </button>
           <button
             onClick={onConfirm}
-            disabled={isSaving}
+            disabled={isSaving || !hasComment}
             className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              isSaving
+              isSaving || !hasComment
                 ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
                 : 'bg-brand-deep text-white hover:bg-brand-mid shadow-lg shadow-brand-deep/20'
             }`}

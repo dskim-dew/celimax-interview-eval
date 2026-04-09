@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate --schema=prisma/schema.supabase.prisma && prisma db push --schema=prisma/schema.supabase.prisma --accept-data-loss && next build",
+    "build": "prisma generate --schema=prisma/schema.supabase.prisma && next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "db:generate": "prisma generate",

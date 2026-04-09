@@ -26,6 +26,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
         body: JSON.stringify({ interviewerNotes: notes }),
       });
       if (!res.ok) throw new Error('저장 실패');
+      router.refresh();
     } catch {
       setReport(previous);
       alert('소견 저장에 실패했습니다. 다시 시도해주세요.');
@@ -50,6 +51,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
         body: JSON.stringify({ ceoDecision: newDecision }),
       });
       if (!res.ok) throw new Error('저장 실패');
+      router.refresh();
     } catch {
       setReport(previous);
       alert('저장에 실패했습니다. 다시 시도해주세요.');
@@ -61,7 +63,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
   const tocItems: TOCItem[] = useMemo(() => {
     const items: TOCItem[] = [
       { id: 'section-info', label: '기본 정보' },
-      { id: 'section-notes', label: 'Hiring M. 소견' },
     ];
     if (report.qnaData) {
       items.push({ id: 'section-qna', label: 'Q&A 스크립트' });
@@ -69,10 +70,12 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
     if (hasAIAnalysis) {
       items.push(
         { id: 'section-overall', label: '종합 분석' },
-        { id: 'section-competency', label: '직무 역량' },
-        { id: 'section-values', label: '핵심 가치' },
+        { id: 'section-competency', label: '문제 해결 역량' },
+        { id: 'section-values', label: '이타적 가치관' },
+        { id: 'section-immersion', label: '몰입' },
       );
     }
+    items.push({ id: 'section-notes', label: 'Hiring M. 소견' });
     return items;
   }, [report.qnaData, hasAIAnalysis]);
 
@@ -107,7 +110,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
               {report.interviewInfo.reportAuthor && (
                 <span>추가 면접관 <span className="text-white font-medium">{report.interviewInfo.reportAuthor}</span></span>
               )}
-              <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate}</span></span>
+              <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate.replace('T', ' ')}</span></span>
             </div>
           </div>
         </div>
@@ -123,6 +126,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
             notes: 'section-notes',
             overall: 'section-overall',
             competency: 'section-competency',
+            immersion: 'section-immersion',
             values: 'section-values',
             qna: 'section-qna',
           }}

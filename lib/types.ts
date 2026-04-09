@@ -21,15 +21,13 @@ export interface ValueEvaluation {
   summary: string;
 }
 
-// 7개 핵심 가치 전체 평가
+// 5개 이타적 가치관 전체 평가
 export interface ValuesEvaluation {
-  honest: ValueEvaluation;      // 솔직
-  proactive: ValueEvaluation;   // 능동
-  optimistic: ValueEvaluation;  // 낙관
-  growth: ValueEvaluation;      // 성장
-  respect: ValueEvaluation;     // 존중
-  altruistic: ValueEvaluation;  // 이타
-  immersed: ValueEvaluation;    // 몰입
+  honest: ValueEvaluation;      // 솔직 (Humbly Aggressive)
+  optimistic: ValueEvaluation;  // 낙관 (Can-Do Spirit)
+  proactive: ValueEvaluation;   // 능동 (Take the Lead)
+  growth: ValueEvaluation;      // 성장 (Hungry for Excellence)
+  respect: ValueEvaluation;     // 존중 (Debate and Commit)
 }
 
 // 개별 직무 역량 평가 (분석 내용만, AI 판단/레벨 제외)
@@ -40,11 +38,13 @@ export interface CompetencyEvaluation {
   summary: string;
 }
 
-// 3개 직무 역량 전체 평가
+// 5개 문제 해결 역량 전체 평가
 export interface CompetenciesEvaluation {
-  expertise: CompetencyEvaluation;       // 직무 전문성
-  problemSolving: CompetencyEvaluation;  // 문제 해결력
-  communication: CompetencyEvaluation;   // 커뮤니케이션
+  problemDefinition: CompetencyEvaluation;   // 문제 정의 (Start with Why)
+  customerFirst: CompetencyEvaluation;       // 고객 관점 (Customer First)
+  impact: CompetencyEvaluation;              // 임팩트 (Focus on Impact)
+  overCommunication: CompetencyEvaluation;   // 오버 커뮤니케이션 (No Surprises)
+  expertise: CompetencyEvaluation;           // 전문성 (Straight to the Core)
 }
 
 // 종합 평가 (분석 내용만, AI 추천 판단 제외)
@@ -99,6 +99,7 @@ export interface EvaluationReport {
   interviewInfo: InterviewInfo;
   values?: ValuesEvaluation;
   competencies?: CompetenciesEvaluation;
+  immersion?: ValueEvaluation;
   overall?: OverallEvaluation;
   interviewerNotes: InterviewerNotes;
   qnaData?: QnAData;
@@ -109,24 +110,34 @@ export interface EvaluationReport {
 export interface AIEvaluationResponse {
   values: ValuesEvaluation;
   competencies: CompetenciesEvaluation;
+  immersion: ValueEvaluation;
   overall: OverallEvaluation;
 }
 
-// 핵심 가치 한글명 매핑
+// 이타적 가치관 한글명 매핑
 export const VALUE_NAMES: Record<keyof ValuesEvaluation, string> = {
-  honest: '솔직',
-  proactive: '능동',
-  optimistic: '낙관',
-  growth: '성장',
-  respect: '존중',
-  altruistic: '이타',
-  immersed: '몰입',
+  honest: '솔직 Humbly Aggressive',
+  optimistic: '낙관 Can-Do Spirit',
+  proactive: '능동 Take the Lead',
+  growth: '성장 Hungry for Excellence',
+  respect: '존중 Debate and Commit',
 };
 
-// 직무 역량 한글명 매핑
+// 문제 해결 역량 한글명 매핑
 export const COMPETENCY_NAMES: Record<keyof CompetenciesEvaluation, string> = {
-  expertise: '직무 전문성',
+  problemDefinition: '문제 정의 Start with Why',
+  customerFirst: '고객 관점 Customer First',
+  impact: '임팩트 Focus on Impact',
+  overCommunication: '오버 커뮤니케이션 No Surprises',
+  expertise: '전문성 Straight to the Core',
+};
+
+// 기존 보고서 역량 한글명 (레거시 호환)
+export const LEGACY_COMPETENCY_NAMES: Record<string, string> = {
   problemSolving: '문제 해결력',
   communication: '커뮤니케이션',
 };
+
+// 몰입 한글명
+export const IMMERSION_NAME = '몰입 Hustle by Heart';
 

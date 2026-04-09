@@ -49,7 +49,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-brand-mid" />
-                  {report.interviewInfo.interviewDate}
+                  {report.interviewInfo.interviewDate.replace('T', ' ')}
                 </span>
                 {/* HM 최종의견 */}
                 <span className={`px-2 py-0.5 rounded-full font-bold ${

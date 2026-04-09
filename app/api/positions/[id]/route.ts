@@ -4,10 +4,10 @@ import { prisma } from '@/lib/db'
 // PUT: 포지션 수정
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
     const { positionName, hiringManager, hrPm, isActive } = body
 
@@ -36,10 +36,10 @@ export async function PUT(
 // DELETE: 포지션 삭제
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     await prisma.recruitmentPosition.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch {

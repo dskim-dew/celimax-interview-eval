@@ -13,6 +13,43 @@ interface InterviewerCommentProps {
   decisionFirst?: boolean;
 }
 
+function restoreCursor(textarea: HTMLTextAreaElement, pos: number) {
+  const scrollTop = textarea.scrollTop;
+  textarea.selectionStart = textarea.selectionEnd = pos;
+  textarea.scrollTop = scrollTop;
+}
+
+function handleBulletInput(
+  e: React.ChangeEvent<HTMLTextAreaElement>,
+  notes: InterviewerNotes,
+  onChange: (notes: InterviewerNotes) => void
+) {
+  const textarea = e.currentTarget;
+  let newValue = e.target.value;
+  const pos = textarea.selectionStart;
+  const scrollTop = textarea.scrollTop;
+
+  // "- " 입력 시 "• "로 자동 변환 (줄 시작에서만)
+  const beforeCursor = newValue.substring(0, pos);
+  const lineStart = beforeCursor.lastIndexOf('\n') + 1;
+  const currentLine = beforeCursor.substring(lineStart);
+
+  if (currentLine === '- ') {
+    newValue = newValue.substring(0, lineStart) + '• ' + newValue.substring(pos);
+    onChange({ ...notes, comment: newValue });
+    setTimeout(() => { restoreCursor(textarea, lineStart + 2); textarea.scrollTop = scrollTop; }, 0);
+    return;
+  }
+  if (currentLine === '  - ') {
+    newValue = newValue.substring(0, lineStart) + '  ◦ ' + newValue.substring(pos);
+    onChange({ ...notes, comment: newValue });
+    setTimeout(() => { restoreCursor(textarea, lineStart + 4); textarea.scrollTop = scrollTop; }, 0);
+    return;
+  }
+
+  onChange({ ...notes, comment: newValue });
+}
+
 function handleBulletKeyDown(
   e: React.KeyboardEvent<HTMLTextAreaElement>,
   notes: InterviewerNotes,
@@ -20,80 +57,116 @@ function handleBulletKeyDown(
 ) {
   const textarea = e.currentTarget;
   const { selectionStart, value } = textarea;
+  const scrollTop = textarea.scrollTop;
+  const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+  const currentLine = value.substring(lineStart, selectionStart);
 
-  // Tab → 불렛 삽입
+  // Tab 처리
   if (e.key === 'Tab') {
     e.preventDefault();
-    const before = value.substring(0, selectionStart);
-    const after = value.substring(selectionStart);
-    const lineStart = before.lastIndexOf('\n') + 1;
-    const currentLine = before.substring(lineStart);
 
-    // 현재 줄이 비어있거나 불렛이 아닌 경우 불렛 추가
-    if (!currentLine.startsWith('- ')) {
-      const newValue = value.substring(0, lineStart) + '- ' + currentLine + after;
+    if (e.shiftKey) {
+      if (currentLine.startsWith('  ◦ ')) {
+        const content = currentLine.substring(4);
+        const newValue = value.substring(0, lineStart) + '• ' + content + value.substring(selectionStart);
+        onChange({ ...notes, comment: newValue });
+        setTimeout(() => { restoreCursor(textarea, selectionStart - 2); textarea.scrollTop = scrollTop; }, 0);
+      }
+      return;
+    }
+
+    if (currentLine.startsWith('• ')) {
+      const content = currentLine.substring(2);
+      const newValue = value.substring(0, lineStart) + '  ◦ ' + content + value.substring(selectionStart);
       onChange({ ...notes, comment: newValue });
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
-      }, 0);
+      setTimeout(() => { restoreCursor(textarea, selectionStart + 2); textarea.scrollTop = scrollTop; }, 0);
+      return;
+    }
+
+    if (!currentLine.startsWith('• ') && !currentLine.startsWith('  ◦ ')) {
+      const newValue = value.substring(0, lineStart) + '• ' + currentLine + value.substring(selectionStart);
+      onChange({ ...notes, comment: newValue });
+      setTimeout(() => { restoreCursor(textarea, selectionStart + 2); textarea.scrollTop = scrollTop; }, 0);
     }
     return;
   }
 
+  // Enter 처리
   if (e.key !== 'Enter') return;
 
-  const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
-  const currentLine = value.substring(lineStart, selectionStart);
-  const bulletMatch = currentLine.match(/^(\s*- )/);
-
-  if (!bulletMatch) return;
+  const isBullet = currentLine.startsWith('• ') || currentLine.startsWith('  ◦ ');
+  if (!isBullet) return;
 
   e.preventDefault();
-  const prefix = bulletMatch[1];
 
-  // 빈 불렛이면 해제
-  if (currentLine.trimEnd() === '-' || currentLine === prefix) {
-    const newValue = value.substring(0, lineStart) + '\n' + value.substring(selectionStart);
-    onChange({ ...notes, comment: newValue });
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = lineStart + 1;
-    }, 0);
+  const isSubBullet = currentLine.startsWith('  ◦ ');
+  const prefix = isSubBullet ? '  ◦ ' : '• ';
+  const content = currentLine.substring(prefix.length);
+
+  if (!content.trim()) {
+    if (isSubBullet) {
+      const newValue = value.substring(0, lineStart) + '• ' + value.substring(selectionStart);
+      onChange({ ...notes, comment: newValue });
+      setTimeout(() => { restoreCursor(textarea, lineStart + 2); textarea.scrollTop = scrollTop; }, 0);
+    } else {
+      const newValue = value.substring(0, lineStart) + value.substring(selectionStart);
+      onChange({ ...notes, comment: newValue });
+      setTimeout(() => { restoreCursor(textarea, lineStart); textarea.scrollTop = scrollTop; }, 0);
+    }
     return;
   }
 
-  // 새 불렛 줄 추가
   const newValue = value.substring(0, selectionStart) + '\n' + prefix + value.substring(selectionStart);
   onChange({ ...notes, comment: newValue });
-  setTimeout(() => {
-    textarea.selectionStart = textarea.selectionEnd = selectionStart + 1 + prefix.length;
-  }, 0);
+  setTimeout(() => { restoreCursor(textarea, selectionStart + 1 + prefix.length); textarea.scrollTop = scrollTop; }, 0);
 }
 
 /** 마크다운 불렛을 HTML 리스트로 렌더링 */
 function RenderedComment({ text }: { text: string }) {
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
-  let bulletItems: string[] = [];
+  let topItems: { text: string; subItems: string[] }[] = [];
 
   const flushBullets = () => {
-    if (bulletItems.length === 0) return;
+    if (topItems.length === 0) return;
     elements.push(
       <ul key={`ul-${elements.length}`} className="space-y-1.5 my-1">
-        {bulletItems.map((item, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <span className="text-brand-mid mt-0.5 shrink-0">•</span>
-            <span><Linkify>{item}</Linkify></span>
+        {topItems.map((item, i) => (
+          <li key={i}>
+            <div className="flex items-start gap-2">
+              <span className="text-brand-mid mt-0.5 shrink-0">•</span>
+              <span><Linkify>{item.text}</Linkify></span>
+            </div>
+            {item.subItems.length > 0 && (
+              <ul className="space-y-1 mt-1 ml-5">
+                {item.subItems.map((sub, j) => (
+                  <li key={j} className="flex items-start gap-2">
+                    <span className="text-slate-400 mt-0.5 shrink-0">◦</span>
+                    <span><Linkify>{sub}</Linkify></span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
     );
-    bulletItems = [];
+    topItems = [];
   };
 
   lines.forEach((line, i) => {
-    const trimmed = line.replace(/^\s*-\s+/, '');
-    if (line.match(/^\s*- /)) {
-      bulletItems.push(trimmed);
+    // 하위 불렛: "  ◦ " 또는 레거시 "  - "
+    if (line.match(/^\s{2,}[◦\-]\s/)) {
+      const content = line.replace(/^\s+[◦\-]\s+/, '');
+      if (topItems.length > 0) {
+        topItems[topItems.length - 1].subItems.push(content);
+      } else {
+        topItems.push({ text: '', subItems: [content] });
+      }
+    // 상위 불렛: "• " 또는 레거시 "- "
+    } else if (line.match(/^[•\-]\s/)) {
+      const content = line.replace(/^[•\-]\s+/, '');
+      topItems.push({ text: content, subItems: [] });
     } else {
       flushBullets();
       if (line.trim()) {
@@ -144,15 +217,15 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
   ) : (
     <div>
       <p className="text-xs text-slate-400 mb-2">
-        면접에서 느낀 점을 간략히 작성해주세요. (3~5줄 권장, <code className="text-slate-300">- </code> 입력 시 불렛 목록)
+        면접에서 느낀 점을 간략히 작성해주세요. (3~5줄 권장, <code className="text-slate-300">-</code> 입력 시 불렛, <code className="text-slate-300">Tab</code>으로 하위 불렛)
       </p>
       <textarea
         value={notes.comment}
-        onChange={(e) => onChange({ ...notes, comment: e.target.value })}
+        onChange={(e) => handleBulletInput(e, notes, onChange)}
         onKeyDown={(e) => handleBulletKeyDown(e, notes, onChange)}
-        placeholder={"- 지원자에 대한 전반적인 인상\n- 강점 또는 우려사항\n- 추가 확인이 필요한 부분"}
+        placeholder={"• 지원자에 대한 전반적인 인상\n• 강점 또는 우려사항\n  ◦ 세부 사항\n• 추가 확인이 필요한 부분"}
         rows={5}
-        className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition resize-none text-sm font-mono"
+        className="w-full px-4 py-3 bg-white/10 border border-slate-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition resize-none text-sm"
       />
     </div>
   );
@@ -168,7 +241,7 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
           <span className="text-xs text-slate-400">선택됨</span>
         )}
       </div>
-      <div className={`grid gap-2 ${decisionFirst ? 'grid-cols-1 w-36' : 'grid-cols-3 gap-3'}`}>
+      <div className="grid grid-cols-3 gap-3">
         {DECISIONS.map(({ value, label, activeClass, dimClass }) => {
           const isSelected = selected === value;
           const isDimmed = selected !== null && !isSelected;

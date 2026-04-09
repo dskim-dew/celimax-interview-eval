@@ -1,7 +1,7 @@
 'use client';
 
-import { Save, Star, Target, MessageSquare } from 'lucide-react';
-import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, ValuesEvaluation, CompetenciesEvaluation, QnAData } from '@/lib/types';
+import { Save, Star, Target, Flame, MessageSquare } from 'lucide-react';
+import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, LEGACY_COMPETENCY_NAMES, IMMERSION_NAME, ValuesEvaluation, CompetenciesEvaluation, QnAData } from '@/lib/types';
 import ValueScoreCard from './ValueScoreCard';
 import CompetencyCard from './CompetencyCard';
 import OverallSection from './OverallSection';
@@ -12,6 +12,7 @@ import QnASection from './QnASection';
 interface SectionIds {
   overall?: string;
   competency?: string;
+  immersion?: string;
   values?: string;
   notes?: string;
   qna?: string;
@@ -58,26 +59,13 @@ export default function EvaluationReport({
               {report.interviewInfo.reportAuthor && (
                 <span>추가 면접관 <span className="text-white font-medium">{report.interviewInfo.reportAuthor}</span></span>
               )}
-              <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate}</span></span>
+              <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate.replace('T', ' ')}</span></span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 1. 면접관 소견 (최종 의견 최상단) */}
-      {!hideNotes && (
-        <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
-          <InterviewerComment
-            notes={report.interviewerNotes}
-            onChange={onNotesChange || (() => {})}
-            readOnly={readOnly}
-            finalDecisionReadOnly={finalDecisionReadOnly}
-            decisionFirst
-          />
-        </div>
-      )}
-
-      {/* 2. 면접 Q&A (고정 높이 스크롤) */}
+      {/* 1. 면접 Q&A (고정 높이 스크롤) */}
       {qnaData && (
         <div
           id={sectionIds.qna}
@@ -107,44 +95,83 @@ export default function EvaluationReport({
         </div>
       )}
 
-      {/* 3. 직무 역량 (아코디언) */}
+      {/* 3. 문제 해결 역량 (아코디언) */}
       {report.competencies && (
         <AccordionSection
-          title="직무 역량 분석"
+          title="문제 해결 역량"
           icon={<Target className="w-5 h-5 text-brand-mid" />}
-          badge="3"
+          badge={String(Object.keys(report.competencies).length)}
           sectionId={sectionIds.competency}
         >
           <div className="space-y-4">
-            {(Object.entries(COMPETENCY_NAMES) as [keyof CompetenciesEvaluation, string][]).map(([key, name]) => (
-              <CompetencyCard
-                key={key}
-                name={name}
-                evaluation={report.competencies![key]}
-              />
-            ))}
+            {Object.entries(report.competencies).map(([key, comp]) => {
+              const name = (COMPETENCY_NAMES as Record<string, string>)[key]
+                || LEGACY_COMPETENCY_NAMES[key]
+                || key;
+              return (
+                <CompetencyCard
+                  key={key}
+                  name={name}
+                  evaluation={comp}
+                />
+              );
+            })}
           </div>
         </AccordionSection>
       )}
 
-      {/* 4. 핵심 가치 (아코디언) */}
+      {/* 4. 이타적 가치관 (아코디언) */}
       {report.values && (
         <AccordionSection
-          title="핵심 가치 분석"
+          title="이타적 가치관"
           icon={<Star className="w-5 h-5 text-brand-mid" />}
-          badge="7"
+          badge={String(Object.keys(report.values).length)}
           sectionId={sectionIds.values}
         >
           <div className="space-y-4">
-            {(Object.entries(VALUE_NAMES) as [keyof ValuesEvaluation, string][]).map(([key, name]) => (
-              <ValueScoreCard
-                key={key}
-                name={name}
-                evaluation={report.values![key]}
-              />
-            ))}
+            {(Object.entries(VALUE_NAMES) as [keyof ValuesEvaluation, string][]).map(([key, name]) => {
+              const value = report.values![key];
+              if (!value) return null;
+              return (
+                <ValueScoreCard
+                  key={key}
+                  name={name}
+                  evaluation={value}
+                />
+              );
+            })}
           </div>
         </AccordionSection>
+      )}
+
+      {/* 5. 몰입 (아코디언) */}
+      {report.immersion && (
+        <AccordionSection
+          title="몰입"
+          icon={<Flame className="w-5 h-5 text-brand-mid" />}
+          badge="1"
+          sectionId={sectionIds.immersion}
+        >
+          <div className="space-y-4">
+            <ValueScoreCard
+              name={IMMERSION_NAME}
+              evaluation={report.immersion}
+            />
+          </div>
+        </AccordionSection>
+      )}
+
+      {/* 6. Hiring Manager 소견 */}
+      {!hideNotes && (
+        <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
+          <InterviewerComment
+            notes={report.interviewerNotes}
+            onChange={onNotesChange || (() => {})}
+            readOnly={readOnly}
+            finalDecisionReadOnly={finalDecisionReadOnly}
+            decisionFirst
+          />
+        </div>
       )}
 
       {/* 최종 리포트 저장 버튼 (메인 페이지 평가표에서만 표시) */}

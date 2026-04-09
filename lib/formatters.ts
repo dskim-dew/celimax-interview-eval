@@ -2,6 +2,8 @@ import {
   EvaluationReport,
   VALUE_NAMES,
   COMPETENCY_NAMES,
+  LEGACY_COMPETENCY_NAMES,
+  IMMERSION_NAME,
   ValuesEvaluation,
   CompetenciesEvaluation,
   QnAData,
@@ -40,23 +42,32 @@ export function formatForMondayTable(report: EvaluationReport): string {
   lines.push(`면접일\t${report.interviewInfo.interviewDate}`);
   lines.push('');
 
-  // 핵심 가치 분석
+  // 이타적 가치관 분석
   if (report.values) {
-    lines.push('핵심 가치\t분석 요약');
+    lines.push('이타적 가치관\t분석 요약');
     for (const [key, name] of Object.entries(VALUE_NAMES)) {
       const value = report.values[key as keyof ValuesEvaluation];
-      lines.push(`${name}\t${value.summary}`);
+      if (value) lines.push(`${name}\t${value.summary}`);
     }
     lines.push('');
   }
 
-  // 직무 역량 분석
+  // 문제 해결 역량 분석
   if (report.competencies) {
-    lines.push('직무 역량\t분석 요약');
-    for (const [key, name] of Object.entries(COMPETENCY_NAMES)) {
-      const comp = report.competencies[key as keyof CompetenciesEvaluation];
+    lines.push('문제 해결 역량\t분석 요약');
+    for (const [key, comp] of Object.entries(report.competencies)) {
+      const name = (COMPETENCY_NAMES as Record<string, string>)[key]
+        || LEGACY_COMPETENCY_NAMES[key]
+        || key;
       lines.push(`${name}\t${comp.summary}`);
     }
+    lines.push('');
+  }
+
+  // 몰입 분석
+  if (report.immersion) {
+    lines.push('몰입\t분석 요약');
+    lines.push(`${IMMERSION_NAME}\t${report.immersion.summary}`);
     lines.push('');
   }
 
@@ -103,14 +114,15 @@ export function formatForText(report: EvaluationReport): string {
   lines.push(`• 면접일: ${report.interviewInfo.interviewDate}`);
   lines.push('');
 
-  // 핵심 가치 분석
+  // 이타적 가치관 분석
   if (report.values) {
     lines.push('───────────────────────────────────────');
-    lines.push('【 핵심 가치 분석 】');
+    lines.push('【 이타적 가치관 분석 】');
     lines.push('───────────────────────────────────────');
 
     for (const [key, name] of Object.entries(VALUE_NAMES)) {
       const value = report.values[key as keyof ValuesEvaluation];
+      if (!value) continue;
       lines.push('');
       lines.push(`▸ ${name}`);
       lines.push(`  ${value.summary}`);
@@ -128,14 +140,16 @@ export function formatForText(report: EvaluationReport): string {
     lines.push('');
   }
 
-  // 직무 역량 분석
+  // 문제 해결 역량 분석
   if (report.competencies) {
     lines.push('───────────────────────────────────────');
-    lines.push('【 직무 역량 분석 】');
+    lines.push('【 문제 해결 역량 분석 】');
     lines.push('───────────────────────────────────────');
 
-    for (const [key, name] of Object.entries(COMPETENCY_NAMES)) {
-      const comp = report.competencies[key as keyof CompetenciesEvaluation];
+    for (const [key, comp] of Object.entries(report.competencies)) {
+      const name = (COMPETENCY_NAMES as Record<string, string>)[key]
+        || LEGACY_COMPETENCY_NAMES[key]
+        || key;
       lines.push('');
       lines.push(`▸ ${name}`);
       lines.push(`  ${comp.summary}`);
@@ -144,11 +158,32 @@ export function formatForText(report: EvaluationReport): string {
       }
       if (comp.evidence.length > 0) {
         lines.push(`  실제 발언:`);
-        comp.evidence.forEach(e => lines.push(`     "${e}"`));
+        comp.evidence.forEach((e: string) => lines.push(`     "${e}"`));
       }
       if (comp.concerns.length > 0) {
         lines.push(`  우려사항: ${comp.concerns.join(', ')}`);
       }
+    }
+    lines.push('');
+  }
+
+  // 몰입 분석
+  if (report.immersion) {
+    lines.push('───────────────────────────────────────');
+    lines.push('【 몰입 분석 】');
+    lines.push('───────────────────────────────────────');
+    lines.push('');
+    lines.push(`▸ ${IMMERSION_NAME}`);
+    lines.push(`  ${report.immersion.summary}`);
+    if (report.immersion.specificCase) {
+      lines.push(`  근거 사례: ${report.immersion.specificCase}`);
+    }
+    if (report.immersion.evidence.length > 0) {
+      lines.push(`  실제 발언:`);
+      report.immersion.evidence.forEach(e => lines.push(`     "${e}"`));
+    }
+    if (report.immersion.concerns.length > 0) {
+      lines.push(`  우려사항: ${report.immersion.concerns.join(', ')}`);
     }
     lines.push('');
   }

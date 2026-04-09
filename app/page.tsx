@@ -199,6 +199,7 @@ export default function Home() {
         interviewInfo: currentInterviewInfo,
         values: evaluation.values,
         competencies: evaluation.competencies,
+        immersion: evaluation.immersion,
         overall: evaluation.overall,
         interviewerNotes: { ...EMPTY_NOTES },
         qnaData,
@@ -246,6 +247,7 @@ export default function Home() {
         interviewInfo,
         values: evaluation.values,
         competencies: evaluation.competencies,
+        immersion: evaluation.immersion,
         overall: evaluation.overall,
         interviewerNotes: { ...EMPTY_NOTES },
       };
