@@ -50,14 +50,14 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
         >
           {/* 한 줄 정보 */}
           <div className="flex items-center gap-3 flex-1 min-w-0 text-sm">
-            <span className="text-slate-300 truncate shrink-0">{report.interviewInfo.position}</span>
-            <span className="font-bold text-white truncate shrink-0">
+            <span className="font-bold text-white truncate w-[140px] shrink-0">{report.interviewInfo.position}</span>
+            <span className="font-bold text-white truncate w-[72px] shrink-0">
               {report.interviewInfo.candidateName}
             </span>
             {report.interviewInfo.interviewRound && (
-              <span className="text-brand-light text-xs shrink-0">{report.interviewInfo.interviewRound}</span>
+              <span className="text-brand-light text-xs w-[36px] shrink-0 text-center">{report.interviewInfo.interviewRound}</span>
             )}
-            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1">
+            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1 w-[64px]">
               <Users className="w-3 h-3 text-brand-mid" />
               {report.interviewInfo.interviewerName}
             </span>
