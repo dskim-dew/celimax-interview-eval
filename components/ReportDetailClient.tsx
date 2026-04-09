@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, XCircle, Pencil, Save, X } from 'lucide-react';
+import Tooltip from '@/components/Tooltip';
 import EvaluationReport from '@/components/EvaluationReport';
 import CopyButton from '@/components/CopyButton';
 import ReportTOC, { TOCItem } from '@/components/ReportTOC';
-import { EvaluationReport as ReportType, InterviewerNotes, CeoDecision } from '@/lib/types';
+import { EvaluationReport as ReportType, InterviewerNotes, InterviewInfo, InterviewRound, CeoDecision } from '@/lib/types';
 
 interface ReportDetailClientProps {
   report: ReportType;
@@ -15,6 +16,42 @@ interface ReportDetailClientProps {
 export default function ReportDetailClient({ report: initialReport }: ReportDetailClientProps) {
   const router = useRouter();
   const [report, setReport] = useState<ReportType>(initialReport);
+
+  // 기본 정보 편집 모드
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [editInfo, setEditInfo] = useState<InterviewInfo>(report.interviewInfo);
+  const [savingInfo, setSavingInfo] = useState(false);
+
+  const startEditInfo = () => {
+    setEditInfo({ ...report.interviewInfo });
+    setEditingInfo(true);
+  };
+
+  const cancelEditInfo = () => {
+    setEditingInfo(false);
+  };
+
+  const saveEditInfo = async () => {
+    setSavingInfo(true);
+    const previous = report;
+    setReport({ ...report, interviewInfo: editInfo });
+    setEditingInfo(false);
+    try {
+      const res = await fetch(`/api/reports/${report.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interviewInfo: editInfo }),
+      });
+      if (!res.ok) throw new Error('저장 실패');
+      router.refresh();
+    } catch {
+      setReport(previous);
+      setEditingInfo(true);
+      alert('기본 정보 저장에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSavingInfo(false);
+    }
+  };
 
   const handleNotesChange = async (notes: InterviewerNotes) => {
     const previous = report;
@@ -79,6 +116,8 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
     return items;
   }, [report.qnaData, hasAIAnalysis]);
 
+  const inputClass = 'px-3 py-1.5 bg-white/10 border border-slate-500/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition';
+
   return (
     <div className="flex gap-6">
       {/* 좌측 TOC */}
@@ -97,29 +136,121 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           </button>
         </div>
 
-        {/* 1. 기본 정보 — 제목 + 한 줄 메타 */}
+        {/* 1. 기본 정보 */}
         <div id="section-info" className="glass-card p-5 scroll-mt-8">
-          <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
-            <h1 className="text-xl font-bold gradient-text whitespace-nowrap">
-              {report.interviewInfo.interviewRound
-                ? `${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님 ${report.interviewInfo.interviewRound}`
-                : `${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님`}
-            </h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
-              <span>Hiring Manager <span className="text-white font-medium">{report.interviewInfo.interviewerName}</span></span>
-              {report.interviewInfo.reportAuthor && (
-                <span>추가 면접관 <span className="text-white font-medium">{report.interviewInfo.reportAuthor}</span></span>
-              )}
-              <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate.replace('T', ' ')}</span></span>
+          {editingInfo ? (
+            /* 편집 모드 */
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">지원자</label>
+                  <input
+                    type="text"
+                    value={editInfo.candidateName}
+                    onChange={e => setEditInfo({ ...editInfo, candidateName: e.target.value })}
+                    className={inputClass + ' w-full'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">포지션</label>
+                  <input
+                    type="text"
+                    value={editInfo.position}
+                    onChange={e => setEditInfo({ ...editInfo, position: e.target.value })}
+                    className={inputClass + ' w-full'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">인터뷰 차수</label>
+                  <select
+                    value={editInfo.interviewRound}
+                    onChange={e => setEditInfo({ ...editInfo, interviewRound: e.target.value as InterviewRound })}
+                    className={inputClass + ' w-full bg-slate-800/50 appearance-none cursor-pointer'}
+                  >
+                    <option value="1차">1차</option>
+                    <option value="2차">2차</option>
+                    <option value="1+2차">1+2차</option>
+                    <option value="커피챗">커피챗</option>
+                    <option value="기타">기타</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Hiring Manager</label>
+                  <input
+                    type="text"
+                    value={editInfo.interviewerName}
+                    onChange={e => setEditInfo({ ...editInfo, interviewerName: e.target.value })}
+                    className={inputClass + ' w-full'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">추가 면접관</label>
+                  <input
+                    type="text"
+                    value={editInfo.reportAuthor}
+                    onChange={e => setEditInfo({ ...editInfo, reportAuthor: e.target.value })}
+                    className={inputClass + ' w-full'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">면접일시</label>
+                  <input
+                    type="text"
+                    value={editInfo.interviewDate}
+                    onChange={e => setEditInfo({ ...editInfo, interviewDate: e.target.value })}
+                    className={inputClass + ' w-full'}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={saveEditInfo}
+                  disabled={savingInfo}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-brand-deep text-white text-sm font-medium rounded-lg hover:bg-brand-mid transition-colors"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  {savingInfo ? '저장 중...' : '저장'}
+                </button>
+                <button
+                  onClick={cancelEditInfo}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-white/5 text-slate-300 text-sm rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  취소
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* 읽기 모드 */
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
+              <h1 className="text-xl font-bold gradient-text whitespace-nowrap">
+                {report.interviewInfo.interviewRound
+                  ? `${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님 ${report.interviewInfo.interviewRound}`
+                  : `${report.interviewInfo.position} ${report.interviewInfo.candidateName} 님`}
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
+                <span>Hiring Manager <span className="text-white font-medium">{report.interviewInfo.interviewerName}</span></span>
+                {report.interviewInfo.reportAuthor && (
+                  <span>추가 면접관 <span className="text-white font-medium">{report.interviewInfo.reportAuthor}</span></span>
+                )}
+                <span>면접일 <span className="text-white font-medium">{report.interviewInfo.interviewDate.replace('T', ' ')}</span></span>
+              </div>
+              <button
+                onClick={startEditInfo}
+                className="ml-auto shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+              >
+                <Pencil className="w-3 h-3" />
+                편집
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* 2. 면접관 소견 → 종합 분석 → 직무역량/핵심가치/Q&A (아코디언) */}
+        {/* 2. 소견 → 종합 분석 → 직무역량/핵심가치/Q&A */}
         <EvaluationReport
           report={report}
           onNotesChange={handleNotesChange}
-          readOnly={true}
+          readOnly={false}
           hideHeader={true}
           qnaData={report.qnaData}
           sectionIds={{
@@ -138,6 +269,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           {report.interviewerNotes.finalDecision !== 'drop' && (
             <div className="flex items-center gap-2 px-4 py-2.5 glass-card rounded-xl">
               <span className="text-sm font-medium text-slate-400 mr-1">민석님 확인</span>
+              <Tooltip text="CEO가 Hiring Manager 의견을 검토하고 최종 채용 여부를 결정하는 단계입니다." />
               <button
                 onClick={() => handleCeoDecision('pass')}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${

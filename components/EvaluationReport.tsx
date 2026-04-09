@@ -65,8 +65,8 @@ export default function EvaluationReport({
         </div>
       )}
 
-      {/* 완성 보고서(readOnly)일 때: Hiring Manager 소견을 맨 위에 표시 */}
-      {readOnly && !hideNotes && (
+      {/* 완성 보고서(sectionIds.notes 있거나 readOnly)일 때: Hiring Manager 소견을 맨 위에 표시 */}
+      {(readOnly || sectionIds.notes) && !hideNotes && (
         <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
           <InterviewerComment
             notes={report.interviewerNotes}
@@ -164,6 +164,7 @@ export default function EvaluationReport({
           icon={<Flame className="w-5 h-5 text-brand-mid" />}
           badge="1"
           sectionId={sectionIds.immersion}
+          tooltip="업무에 진심으로 몰두하고 자발적으로 시간을 투자하는 내적 동기를 평가합니다."
         >
           <div className="space-y-4">
             <ValueScoreCard
@@ -174,8 +175,8 @@ export default function EvaluationReport({
         </AccordionSection>
       )}
 
-      {/* 작성 중(비readOnly)일 때: Hiring Manager 소견을 맨 아래에 표시 */}
-      {!readOnly && !hideNotes && (
+      {/* 작성 중(비readOnly, sectionIds.notes 없음)일 때: Hiring Manager 소견을 맨 아래에 표시 */}
+      {!readOnly && !sectionIds.notes && !hideNotes && (
         <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
           <InterviewerComment
             notes={report.interviewerNotes}
