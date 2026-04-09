@@ -212,7 +212,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
             className="w-full px-4 py-3 glass-input appearance-none cursor-pointer"
           >
             <option value="" className="bg-slate-800">선택해주세요</option>
-            {Array.from(new Set(positions.map(p => p.hiringManager))).map(hm => (
+            {Array.from(new Set(positions.map(p => p.hiringManager))).sort((a, b) => a.localeCompare(b, 'ko')).map(hm => (
               <option key={hm} value={hm} className="bg-slate-800">{hm}</option>
             ))}
           </select>
@@ -235,7 +235,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
             className="w-full px-4 py-3 glass-input appearance-none cursor-pointer"
           >
             <option value="" className="bg-slate-800">선택해주세요</option>
-            {filteredPositions.map(p => (
+            {[...filteredPositions].sort((a, b) => a.positionName.localeCompare(b.positionName, 'ko')).map(p => (
               <option key={p.id} value={p.positionName} className="bg-slate-800">{p.positionName}</option>
             ))}
           </select>
