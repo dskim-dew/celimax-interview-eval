@@ -30,7 +30,6 @@ interface EvaluationReportProps {
   sectionIds?: SectionIds;
   qnaData?: QnAData;
   onToggleNotesEdit?: () => void;
-  editingNotes?: boolean;
 }
 
 export default function EvaluationReport({
@@ -45,7 +44,6 @@ export default function EvaluationReport({
   sectionIds = {},
   qnaData,
   onToggleNotesEdit,
-  editingNotes,
 }: EvaluationReportProps) {
   return (
     <div className="space-y-6">

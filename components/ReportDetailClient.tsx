@@ -255,7 +255,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           hideHeader={true}
           qnaData={report.qnaData}
           onToggleNotesEdit={() => setEditingNotes(v => !v)}
-          editingNotes={editingNotes}
           sectionIds={{
             notes: 'section-notes',
             overall: 'section-overall',
