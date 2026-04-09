@@ -133,12 +133,12 @@ function toDbInput(report: EvaluationReport) {
     reportAuthor: report.interviewInfo.reportAuthor ?? '',
     tiroScript: report.interviewInfo.tiroScript,
     transcript: report.interviewInfo.transcript ?? null,
-    qnaData: report.qnaData ? JSON.stringify(report.qnaData) : null,
-    values: report.values ? JSON.stringify(report.values) : null,
-    competencies: report.competencies ? JSON.stringify(report.competencies) : null,
-    immersion: report.immersion ? JSON.stringify(report.immersion) : null,
-    overall: report.overall ? JSON.stringify(report.overall) : null,
-    interviewerNotes: JSON.stringify(report.interviewerNotes),
+    qnaData: report.qnaData ?? Prisma.DbNull,
+    values: report.values ?? Prisma.DbNull,
+    competencies: report.competencies ?? Prisma.DbNull,
+    immersion: report.immersion ?? Prisma.DbNull,
+    overall: report.overall ?? Prisma.DbNull,
+    interviewerNotes: report.interviewerNotes as unknown as Prisma.InputJsonValue,
     ceoDecision: report.ceoDecision ?? null,
   }
 }
