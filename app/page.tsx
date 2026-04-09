@@ -9,6 +9,7 @@ import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SaveConfirmDialog from '@/components/SaveConfirmDialog';
+import InterviewerComment from '@/components/InterviewerComment';
 import { InterviewInfo, EvaluationReport as ReportType, AIEvaluationResponse, InterviewerNotes, QnAData } from '@/lib/types';
 
 const EMPTY_NOTES: InterviewerNotes = {
@@ -471,14 +472,35 @@ export default function Home() {
               <div className="animate-fadeIn">
                 <EvaluationReport
                   report={report}
-                  onNotesChange={handleNotesChange}
-                  onSave={handleSave}
-                  isSaving={isSaving}
-                  qnaData={qnaData ?? undefined}
+                  hideNotes
                 />
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* 소견란 + 저장 버튼 (탭 바깥, 탭 전환해도 유지) */}
+      {report && !isAnyLoading && (
+        <div className="space-y-6">
+          <InterviewerComment
+            notes={report.interviewerNotes}
+            onChange={handleNotesChange}
+            decisionFirst
+          />
+          <div className="flex justify-center pt-2">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`flex items-center gap-2 px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                isSaving
+                  ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                  : 'bg-brand-deep text-white hover:bg-brand-mid shadow-lg shadow-brand-deep/20'
+              }`}
+            >
+              {isSaving ? '저장 중...' : '최종 리포트 저장'}
+            </button>
           </div>
         </div>
       )}
