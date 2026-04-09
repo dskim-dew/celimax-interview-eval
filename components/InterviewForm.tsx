@@ -394,7 +394,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div className="mb-2 p-3 bg-brand-deep/15 border border-brand-deep/30 rounded-lg">
           <p className="text-sm text-brand-light flex items-center gap-2">
             <span>💡</span>
-            Tiro에서 <strong>&quot;LLM용으로 복사&quot;</strong>를 선택하여 아래에 붙여넣어주세요
+            Tiro에서 <strong>스크립트 → 복사 → &quot;LLM용으로 복사&quot;</strong>를 선택하여 아래에 붙여넣어주세요
           </p>
         </div>
         <textarea
@@ -404,7 +404,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
           onChange={handleTiroScriptChange}
           rows={15}
           className="w-full px-4 py-3 glass-input resize-y font-mono text-sm"
-          placeholder={"[면접 스크립트 예시]\n\n면접관: 자기소개 부탁드립니다.\n지원자: 안녕하세요, 저는 3년차 프론트엔드 개발자 홍길동입니다...\n면접관: 이전 회사에서 가장 도전적이었던 프로젝트에 대해 말씀해주세요.\n지원자: 네, 작년에 레거시 시스템을 마이그레이션하는 프로젝트를...\n\n* Tiro에서 \"LLM용으로 복사\"를 선택하면 최적의 형식으로 붙여넣을 수 있습니다."}
+          placeholder={"[면접 스크립트 예시]\n\n면접관: 자기소개 부탁드립니다.\n지원자: 안녕하세요, 저는 3년차 프론트엔드 개발자 홍길동입니다...\n면접관: 이전 회사에서 가장 도전적이었던 프로젝트에 대해 말씀해주세요.\n지원자: 네, 작년에 레거시 시스템을 마이그레이션하는 프로젝트를...\n\n* Tiro에서 스크립트 → 복사 → \"LLM용으로 복사\"를 선택하면 최적의 형식으로 붙여넣을 수 있습니다."}
         />
         <p className="mt-1 text-xs text-slate-500">
           스크립트에 면접관/지원자/포지션 정보가 포함되어 있으면 위 입력란에 자동으로 채워집니다.
