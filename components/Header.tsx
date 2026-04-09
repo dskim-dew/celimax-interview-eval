@@ -6,7 +6,7 @@ import { FolderOpen, Settings, BookOpen } from 'lucide-react';
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-40 mb-6 flex items-center justify-between py-3 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 mb-6 flex items-center justify-between py-3 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-[#0a0f0c]">
       <Link href="/" className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity">
         <Image
           src="/logo.png"
