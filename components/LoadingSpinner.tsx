@@ -20,16 +20,14 @@ const STEPS: Record<Phase, { time: number; label: string }[]> = {
 
 const TIPS: Record<Phase, string[]> = {
   qna: [
-    '면접관 소견은 Q&A와 평가표를 참고하여 작성하면 좋습니다',
+    'Q&A 정리 후 내용을 확인하고 평가표 작성으로 넘어갑니다',
     '최종 의견은 드랍 / Weak Go / Strong Go 중 선택합니다',
-    '평가 기준이 궁금하시면 헤더의 "인터뷰 가이드"를 참고하세요',
-    'Q&A 정리 후 내용을 확인하고, 평가표 작성으로 넘어갑니다',
+    '평가 기준은 헤더의 "인터뷰 가이드"를 참고하세요',
   ],
   evaluation: [
     '가치관 5개: 솔직, 낙관, 능동, 성장, 존중',
-    '역량 5개: 문제 정의, 고객 관점, 임팩트, 오버 커뮤니케이션, 전문성',
-    '몰입: 내적 동기부여와 자발적 시간 투자를 평가합니다',
-    'AI 분석은 참고용이며, 최종 판단은 면접관이 직접 합니다',
+    '역량 5개: 문제 정의, 고객 관점, 임팩트, 커뮤니케이션, 전문성',
+    '몰입: 내적 동기부여와 자발적 시간 투자',
   ],
 };
 
@@ -45,19 +43,11 @@ export default function LoadingSpinner({
   phase = 'qna',
 }: LoadingSpinnerProps) {
   const [elapsed, setElapsed] = useState(0);
-  const [tipIndex, setTipIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed(s => s + 1), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    const tipTimer = setInterval(() => {
-      setTipIndex(i => (i + 1) % TIPS[phase].length);
-    }, 5000);
-    return () => clearInterval(tipTimer);
-  }, [phase]);
 
   // 현재 단계 결정
   const steps = STEPS[phase];
@@ -118,12 +108,16 @@ export default function LoadingSpinner({
         )}
       </div>
 
-      {/* 팁 */}
-      <div className="mt-6 px-6 py-3 bg-white/5 border border-white/10 rounded-xl max-w-md text-center transition-all duration-500">
-        <p className="text-sm text-slate-400">
-          <span className="text-brand-light mr-1">Tip</span>
-          {TIPS[phase][tipIndex]}
-        </p>
+      {/* 팁 — 3열 그리드 */}
+      <div className="mt-6 grid grid-cols-3 gap-3 w-full max-w-2xl">
+        {TIPS[phase].map((tip, i) => (
+          <div key={i} className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center">
+            <p className="text-xs text-slate-400">
+              <span className="text-brand-light font-medium block mb-1">Tip {i + 1}</span>
+              {tip}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
