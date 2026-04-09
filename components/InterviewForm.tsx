@@ -354,7 +354,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
               onChange={(e) => handleDatePartChange(interviewDateValue, e.target.value, interviewMinute)}
               className="w-20 px-2 py-3 glass-input cursor-pointer text-center"
             >
-              {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+              {Array.from({ length: 16 }, (_, i) => String(i + 7).padStart(2, '0')).map(h => (
                 <option key={h} value={h}>{h}시</option>
               ))}
             </select>
