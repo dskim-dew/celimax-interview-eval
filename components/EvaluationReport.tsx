@@ -164,7 +164,7 @@ export default function EvaluationReport({
           icon={<Flame className="w-5 h-5 text-brand-mid" />}
           badge="1"
           sectionId={sectionIds.immersion}
-          tooltip="업무에 진심으로 몰두하고 자발적으로 시간을 투자하는 내적 동기를 평가합니다."
+
         >
           <div className="space-y-4">
             <ValueScoreCard

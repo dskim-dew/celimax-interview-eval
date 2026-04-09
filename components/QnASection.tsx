@@ -5,6 +5,7 @@ import { FileText, Loader2 } from 'lucide-react';
 import { QnAData, QNA_TOPIC_ORDER } from '@/lib/types';
 import Linkify from './Linkify';
 
+
 interface QnASectionProps {
   qnaData: QnAData;
   onGenerateEvaluation: () => void;
@@ -29,7 +30,7 @@ export default function QnASection({
   return (
     <div className="space-y-4">
       {/* 토픽 필터 */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => setTopicFilter(null)}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${

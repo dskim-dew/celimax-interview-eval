@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Clock, CheckCircle2, XCircle, Pencil, Save, X } from 'lucide-react';
-import Tooltip from '@/components/Tooltip';
+
 import EvaluationReport from '@/components/EvaluationReport';
 import CopyButton from '@/components/CopyButton';
 import ReportTOC, { TOCItem } from '@/components/ReportTOC';
@@ -269,7 +269,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           {report.interviewerNotes.finalDecision !== 'drop' && (
             <div className="flex items-center gap-2 px-4 py-2.5 glass-card rounded-xl">
               <span className="text-sm font-medium text-slate-400 mr-1">민석님 확인</span>
-              <Tooltip text="CEO가 Hiring Manager 의견을 검토하고 최종 채용 여부를 결정하는 단계입니다." />
               <button
                 onClick={() => handleCeoDecision('pass')}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${

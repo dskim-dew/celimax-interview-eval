@@ -5,6 +5,7 @@ import { MessageCircle } from 'lucide-react';
 import { InterviewerNotes, FinalDecision } from '@/lib/types';
 import Linkify from './Linkify';
 
+
 interface InterviewerCommentProps {
   notes: InterviewerNotes;
   onChange: (notes: InterviewerNotes) => void;
