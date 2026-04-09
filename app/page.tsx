@@ -359,8 +359,8 @@ export default function Home() {
       )}
 
       {/* 로딩 */}
-      {qnaLoading && <LoadingSpinner message="스크립트를 Q&A 형식으로 정리하고 있습니다..." streamedChars={streamProgress} />}
-      {evaluationLoading && !qnaLoading && <LoadingSpinner message="평가표를 작성하고 있습니다..." streamedChars={streamProgress} />}
+      {qnaLoading && <LoadingSpinner phase="qna" streamedChars={streamProgress} />}
+      {evaluationLoading && !qnaLoading && <LoadingSpinner phase="evaluation" streamedChars={streamProgress} />}
 
       {/* 쿨다운 타이머 */}
       {cooldownSec > 0 && !error && (
