@@ -63,6 +63,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
   const tocItems: TOCItem[] = useMemo(() => {
     const items: TOCItem[] = [
       { id: 'section-info', label: '기본 정보' },
+      { id: 'section-notes', label: 'Hiring M. 소견' },
     ];
     if (report.qnaData) {
       items.push({ id: 'section-qna', label: 'Q&A 스크립트' });
@@ -75,7 +76,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
         { id: 'section-immersion', label: '몰입' },
       );
     }
-    items.push({ id: 'section-notes', label: 'Hiring M. 소견' });
     return items;
   }, [report.qnaData, hasAIAnalysis]);
 

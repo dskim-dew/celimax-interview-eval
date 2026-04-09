@@ -52,7 +52,7 @@ export default function CopyButton({ report }: CopyButtonProps) {
         className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 shadow-lg shadow-emerald-500/20"
       >
         <Copy className="w-5 h-5" />
-        로그 & 결과 공유
+        공유
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

@@ -65,7 +65,20 @@ export default function EvaluationReport({
         </div>
       )}
 
-      {/* 1. 면접 Q&A (고정 높이 스크롤) */}
+      {/* 완성 보고서(readOnly)일 때: Hiring Manager 소견을 맨 위에 표시 */}
+      {readOnly && !hideNotes && (
+        <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
+          <InterviewerComment
+            notes={report.interviewerNotes}
+            onChange={onNotesChange || (() => {})}
+            readOnly={readOnly}
+            finalDecisionReadOnly={finalDecisionReadOnly}
+            decisionFirst
+          />
+        </div>
+      )}
+
+      {/* 면접 Q&A (고정 높이 스크롤) */}
       {qnaData && (
         <div
           id={sectionIds.qna}
@@ -88,14 +101,14 @@ export default function EvaluationReport({
         </div>
       )}
 
-      {/* 3. 종합 분석 */}
+      {/* 종합 분석 */}
       {report.overall && (
         <div id={sectionIds.overall} className={sectionIds.overall ? 'scroll-mt-8' : undefined}>
           <OverallSection evaluation={report.overall} />
         </div>
       )}
 
-      {/* 3. 문제 해결 역량 (아코디언) */}
+      {/* 문제 해결 역량 (아코디언) */}
       {report.competencies && (
         <AccordionSection
           title="문제 해결 역량"
@@ -120,7 +133,7 @@ export default function EvaluationReport({
         </AccordionSection>
       )}
 
-      {/* 4. 이타적 가치관 (아코디언) */}
+      {/* 이타적 가치관 (아코디언) */}
       {report.values && (
         <AccordionSection
           title="이타적 가치관"
@@ -144,7 +157,7 @@ export default function EvaluationReport({
         </AccordionSection>
       )}
 
-      {/* 5. 몰입 (아코디언) */}
+      {/* 몰입 (아코디언) */}
       {report.immersion && (
         <AccordionSection
           title="몰입"
@@ -161,8 +174,8 @@ export default function EvaluationReport({
         </AccordionSection>
       )}
 
-      {/* 6. Hiring Manager 소견 */}
-      {!hideNotes && (
+      {/* 작성 중(비readOnly)일 때: Hiring Manager 소견을 맨 아래에 표시 */}
+      {!readOnly && !hideNotes && (
         <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
           <InterviewerComment
             notes={report.interviewerNotes}
