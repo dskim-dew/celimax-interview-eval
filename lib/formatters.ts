@@ -244,15 +244,15 @@ export function formatForSummary(report: EvaluationReport): string {
 export function formatForShareSummary(report: EvaluationReport, reportUrl?: string): string {
   const { position, interviewRound, candidateName, interviewerName, reportAuthor, interviewDate } = report.interviewInfo;
   const roundLabel = interviewRound ?? '';
+  // "2026-03-27 17:00" → "2026.03.27 17:00"
   const formattedDate = interviewDate.replace(/-/g, '.');
 
   const lines: string[] = [];
 
   // 제목
-  const titleText = roundLabel
-    ? `${position} ${candidateName} 님 ${roundLabel}`
-    : `${position} ${candidateName} 님`;
-  lines.push(`${titleText} (${formattedDate})`);
+  const titleParts = [position, `${candidateName} 님`];
+  if (roundLabel) titleParts.push(roundLabel);
+  lines.push(`[인터뷰 로그] ${titleParts.join(' ')}`);
   lines.push('');
 
   // 기본 정보
@@ -260,24 +260,25 @@ export function formatForShareSummary(report: EvaluationReport, reportUrl?: stri
   if (reportAuthor) {
     lines.push(`• 추가 면접관: ${reportAuthor}`);
   }
-  lines.push('');
+  lines.push(`• 일자: ${formattedDate}`);
 
   // 보고서 링크
   if (reportUrl) {
-    lines.push(`보고서: ${reportUrl}`);
-    lines.push('');
+    lines.push(`• 보고서: ${reportUrl}`);
   }
 
-  // 최종 의견 + 면접관 소견
+  // 구분선 + 최종 의견 + 면접관 소견
   const notes = report.interviewerNotes;
   const decisionLabel: Record<string, string> = { drop: '드랍', 'weak-go': 'Weak Go', 'strong-go': 'Strong Go' };
-  if (notes.finalDecision) {
-    lines.push(`최종 의견: ${decisionLabel[notes.finalDecision]}`);
-  }
-  if (notes.comment) {
+  if (notes.finalDecision || notes.comment) {
     lines.push('');
-    lines.push('Hiring M. 소견:');
-    lines.push(notes.comment);
+    lines.push('================================');
+    if (notes.finalDecision) {
+      lines.push(`최종 의견: ${decisionLabel[notes.finalDecision]}`);
+    }
+    if (notes.comment) {
+      lines.push(notes.comment);
+    }
   }
 
   return lines.join('\n');
