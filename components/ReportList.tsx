@@ -20,6 +20,21 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
     );
   }
 
+  const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+  function formatDateWithDay(dateStr: string) {
+    // "2026-03-27 17:00" → "2026-03-27 (금) 17:00"
+    const datePart = dateStr.slice(0, 10);
+    const timePart = dateStr.slice(10).replace('T', ' ').trim();
+    try {
+      const d = new Date(datePart);
+      const day = DAY_NAMES[d.getDay()];
+      return `${datePart} (${day})${timePart ? ' ' + timePart : ''}`;
+    } catch {
+      return dateStr.replace('T', ' ');
+    }
+  }
+
   // 면접일 기준 최신순 정렬
   const sorted = [...reports].sort((a, b) =>
     b.interviewInfo.interviewDate.localeCompare(a.interviewInfo.interviewDate)
@@ -35,21 +50,23 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
         >
           {/* 한 줄 정보 */}
           <div className="flex items-center gap-3 flex-1 min-w-0 text-sm">
+            <span className="text-slate-300 truncate shrink-0">{report.interviewInfo.position}</span>
             <span className="font-bold text-white truncate shrink-0">
               {report.interviewInfo.candidateName}
             </span>
-            <span className="text-slate-400 truncate shrink-0">{report.interviewInfo.position}</span>
             {report.interviewInfo.interviewRound && (
               <span className="text-brand-light text-xs shrink-0">{report.interviewInfo.interviewRound}</span>
             )}
-            <span className="text-slate-500 text-xs shrink-0 flex items-center gap-1">
-              <Users className="w-3 h-3" />
+            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1">
+              <Users className="w-3 h-3 text-brand-mid" />
               {report.interviewInfo.interviewerName}
             </span>
-            <span className="text-slate-500 text-xs shrink-0 flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {report.interviewInfo.interviewDate.replace('T', ' ')}
+            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-brand-mid" />
+              {formatDateWithDay(report.interviewInfo.interviewDate)}
             </span>
+            {/* 구분선 */}
+            <span className="w-px h-4 bg-white/15 shrink-0" />
             {/* HM 최종의견 */}
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${
               report.interviewerNotes.finalDecision === 'strong-go'
