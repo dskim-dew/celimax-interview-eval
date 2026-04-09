@@ -13,8 +13,6 @@ interface SaveConfirmDialogProps {
 export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSaving }: SaveConfirmDialogProps) {
   const hasComment = !!report.interviewerNotes.comment?.trim();
   const hasDecision = !!report.interviewerNotes.finalDecision;
-  const hasMissing = !hasComment || !hasDecision;
-
   const decisionLabel: Record<string, string> = {
     drop: '드랍',
     'weak-go': 'Weak Go',

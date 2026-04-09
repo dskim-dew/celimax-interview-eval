@@ -1,7 +1,7 @@
 'use client';
 
 import { Save, Star, Target, Flame, MessageSquare } from 'lucide-react';
-import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, LEGACY_COMPETENCY_NAMES, IMMERSION_NAME, ValuesEvaluation, CompetenciesEvaluation, QnAData } from '@/lib/types';
+import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, LEGACY_COMPETENCY_NAMES, IMMERSION_NAME, ValuesEvaluation, QnAData } from '@/lib/types';
 import ValueScoreCard from './ValueScoreCard';
 import CompetencyCard from './CompetencyCard';
 import OverallSection from './OverallSection';

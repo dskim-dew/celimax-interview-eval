@@ -5,7 +5,6 @@ import {
   LEGACY_COMPETENCY_NAMES,
   IMMERSION_NAME,
   ValuesEvaluation,
-  CompetenciesEvaluation,
   QnAData,
 } from './types';
 
