@@ -17,8 +17,9 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
   const router = useRouter();
   const [report, setReport] = useState<ReportType>(initialReport);
 
-  // 기본 정보 편집 모드
+  // 편집 모드
   const [editingInfo, setEditingInfo] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
   const [editInfo, setEditInfo] = useState<InterviewInfo>(report.interviewInfo);
   const [savingInfo, setSavingInfo] = useState(false);
 
@@ -237,10 +238,10 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
               </div>
               <button
                 onClick={startEditInfo}
-                className="ml-auto shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                className="ml-auto shrink-0 p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                title="기본 정보 편집"
               >
-                <Pencil className="w-3 h-3" />
-                편집
+                <Pencil className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
@@ -250,9 +251,11 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
         <EvaluationReport
           report={report}
           onNotesChange={handleNotesChange}
-          readOnly={false}
+          readOnly={!editingNotes}
           hideHeader={true}
           qnaData={report.qnaData}
+          onToggleNotesEdit={() => setEditingNotes(v => !v)}
+          editingNotes={editingNotes}
           sectionIds={{
             notes: 'section-notes',
             overall: 'section-overall',

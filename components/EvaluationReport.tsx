@@ -1,6 +1,6 @@
 'use client';
 
-import { Save, Star, Target, Flame, MessageSquare } from 'lucide-react';
+import { Save, Star, Target, Flame, MessageSquare, Pencil } from 'lucide-react';
 import { EvaluationReport as ReportType, InterviewerNotes, VALUE_NAMES, COMPETENCY_NAMES, LEGACY_COMPETENCY_NAMES, IMMERSION_NAME, ValuesEvaluation, QnAData } from '@/lib/types';
 import ValueScoreCard from './ValueScoreCard';
 import CompetencyCard from './CompetencyCard';
@@ -29,6 +29,8 @@ interface EvaluationReportProps {
   finalDecisionReadOnly?: boolean;
   sectionIds?: SectionIds;
   qnaData?: QnAData;
+  onToggleNotesEdit?: () => void;
+  editingNotes?: boolean;
 }
 
 export default function EvaluationReport({
@@ -42,6 +44,8 @@ export default function EvaluationReport({
   finalDecisionReadOnly = false,
   sectionIds = {},
   qnaData,
+  onToggleNotesEdit,
+  editingNotes,
 }: EvaluationReportProps) {
   return (
     <div className="space-y-6">
@@ -67,7 +71,16 @@ export default function EvaluationReport({
 
       {/* 완성 보고서(sectionIds.notes 있거나 readOnly)일 때: Hiring Manager 소견을 맨 위에 표시 */}
       {(readOnly || sectionIds.notes) && !hideNotes && (
-        <div id={sectionIds.notes} className={sectionIds.notes ? 'scroll-mt-8' : undefined}>
+        <div id={sectionIds.notes} className={`${sectionIds.notes ? 'scroll-mt-8' : ''} relative`}>
+          {onToggleNotesEdit && (
+            <button
+              onClick={onToggleNotesEdit}
+              className="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+              title="소견 편집"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
           <InterviewerComment
             notes={report.interviewerNotes}
             onChange={onNotesChange || (() => {})}
