@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --schema=prisma/schema.supabase.prisma && prisma db push --schema=prisma/schema.supabase.prisma && next build",
-    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
+    "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:generate:prod": "prisma generate --schema=prisma/schema.mysql.prisma",
