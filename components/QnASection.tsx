@@ -38,7 +38,7 @@ export default function QnASection({
               : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
           }`}
         >
-          전체 ({qnaData.metadata.totalQuestions})
+          전체 ({qnaData.metadata?.totalQuestions ?? qnaData.qna.length})
         </button>
         {(() => {
           const allTopics = Array.from(new Set(qnaData.qna.map(q => q.topic)));
