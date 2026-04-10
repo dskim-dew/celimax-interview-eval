@@ -73,17 +73,20 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : report.interviewerNotes.finalDecision === 'weak-go'
                 ? 'bg-amber-400/20 text-amber-400 border border-amber-400/30'
-                : report.interviewerNotes.finalDecision === 'drop'
+                : report.interviewerNotes.finalDecision === 'weak-no'
+                ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                : report.interviewerNotes.finalDecision === 'strong-no'
                 ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                 : 'bg-white/5 text-slate-500 border border-white/10'
             }`}>
               {report.interviewerNotes.finalDecision === 'strong-go' ? 'Strong Go'
                 : report.interviewerNotes.finalDecision === 'weak-go' ? 'Weak Go'
-                : report.interviewerNotes.finalDecision === 'drop' ? '드랍'
+                : report.interviewerNotes.finalDecision === 'weak-no' ? 'Weak No'
+                : report.interviewerNotes.finalDecision === 'strong-no' ? 'Strong No'
                 : '미정'}
             </span>
             {/* 민석님 확인 */}
-            {report.interviewerNotes.finalDecision !== 'drop' && (
+            {report.interviewerNotes.finalDecision !== 'strong-no' && (
               <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${
                 report.ceoDecision === 'pass'
                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'

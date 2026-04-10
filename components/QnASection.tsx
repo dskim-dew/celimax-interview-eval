@@ -1,26 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Loader2 } from 'lucide-react';
 import { QnAData, QNA_TOPIC_ORDER } from '@/lib/types';
 import Linkify from './Linkify';
 
 
 interface QnASectionProps {
   qnaData: QnAData;
-  onGenerateEvaluation: () => void;
-  evaluationLoading: boolean;
-  hasReport: boolean;
-  onSwitchToEvaluation?: () => void;
 }
 
-export default function QnASection({
-  qnaData,
-  onGenerateEvaluation,
-  evaluationLoading,
-  hasReport,
-  onSwitchToEvaluation,
-}: QnASectionProps) {
+export default function QnASection({ qnaData }: QnASectionProps) {
   const [topicFilter, setTopicFilter] = useState<string | null>(null);
 
   const filteredQna = topicFilter
@@ -75,65 +64,40 @@ export default function QnASection({
               {item.topic}
             </span>
 
-            <div className="mb-3">
-              <p className="text-sm text-brand-light mb-1 font-medium">
-                Q{item.id}. 면접관
-              </p>
-              <p className="text-white pl-4 border-l-2 border-brand-deep">
-                <Linkify>{item.question}</Linkify>
-              </p>
-            </div>
+            {(() => {
+              const qSpeaker = item.questionSpeaker ?? 'interviewer';
+              const aSpeaker = item.answerSpeaker ?? 'candidate';
+              const qLabel = qSpeaker === 'candidate' ? '지원자' : '면접관';
+              const aLabel = aSpeaker === 'interviewer' ? '면접관' : '지원자';
+              const qColor = qSpeaker === 'candidate' ? 'text-green-300' : 'text-brand-light';
+              const aColor = aSpeaker === 'interviewer' ? 'text-brand-light' : 'text-green-300';
+              const qBorder = qSpeaker === 'candidate' ? 'border-green-400' : 'border-brand-deep';
+              const aBorder = aSpeaker === 'interviewer' ? 'border-brand-deep' : 'border-green-400';
 
-            <div>
-              <p className="text-sm text-green-300 mb-1 font-medium">
-                A. 지원자
-              </p>
-              <p className="text-slate-200 pl-4 border-l-2 border-green-400 leading-relaxed">
-                <Linkify>{item.answer}</Linkify>
-              </p>
-            </div>
+              return (
+                <>
+                  <div className="mb-3">
+                    <p className={`text-sm ${qColor} mb-1 font-medium`}>
+                      Q{item.id}. {qLabel}
+                    </p>
+                    <p className={`text-white pl-4 border-l-2 ${qBorder}`}>
+                      <Linkify>{item.question}</Linkify>
+                    </p>
+                  </div>
+                  <div>
+                    <p className={`text-sm ${aColor} mb-1 font-medium`}>
+                      A. {aLabel}
+                    </p>
+                    <p className={`text-slate-200 pl-4 border-l-2 ${aBorder} leading-relaxed`}>
+                      <Linkify>{item.answer}</Linkify>
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         ))}
       </div>
-
-      {/* 2단계 버튼 (평가표 미완료 시) */}
-      {!hasReport && (
-        <button
-          onClick={onGenerateEvaluation}
-          disabled={evaluationLoading}
-          className={`w-full mt-4 py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-3 ${
-            evaluationLoading
-              ? 'bg-slate-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-brand-deep/25 hover:shadow-brand-deep/40'
-          }`}
-        >
-          {evaluationLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              평가표 작성 중...
-            </>
-          ) : (
-            <>
-              <FileText className="w-5 h-5" />
-              2단계: 평가표 작성
-            </>
-          )}
-        </button>
-      )}
-
-      {/* 평가표로 이동 버튼 (완료 시) */}
-      {hasReport && onSwitchToEvaluation && (
-        <div className="mt-6 p-4 bg-brand-deep/15 rounded-lg border border-brand-deep/30">
-          <p className="text-brand-light mb-3 text-sm font-medium">평가표 작성이 완료되었습니다</p>
-          <button
-            onClick={onSwitchToEvaluation}
-            className="px-6 py-3 bg-emerald-500 hover:bg-brand-deep text-white rounded-lg transition flex items-center gap-2"
-          >
-            <FileText className="w-5 h-5" />
-            평가표 보기
-          </button>
-        </div>
-      )}
     </div>
   );
 }

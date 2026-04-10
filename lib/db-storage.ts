@@ -32,17 +32,29 @@ function migrateOverall(raw: any): OverallEvaluation {
   }
 }
 
+// 레거시 'drop' → 'strong-no' 변환
+function migrateFinalDecision(decision: string | undefined | null): InterviewerNotes['finalDecision'] {
+  if (!decision) return undefined
+  if (decision === 'drop') return 'strong-no'
+  return decision as InterviewerNotes['finalDecision']
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function migrateNotes(raw: any): InterviewerNotes {
   if (!raw) return { comment: '' }
   // 이전 형식: {strengths, concerns, validation, finalDecision}
-  // 새 형식: {comment, finalDecision}
-  if (raw.comment !== undefined) return raw as InterviewerNotes
-  const parts = [raw.strengths, raw.concerns, raw.validation].filter(Boolean)
-  return {
-    comment: parts.join('\n'),
-    finalDecision: raw.finalDecision ?? undefined,
+  if (raw.comment === undefined && (raw.strengths !== undefined || raw.concerns !== undefined || raw.validation !== undefined)) {
+    const parts = [raw.strengths, raw.concerns, raw.validation].filter(Boolean)
+    return {
+      comment: parts.join('\n'),
+      finalDecision: migrateFinalDecision(raw.finalDecision),
+    }
   }
+  // 현재 형식: drop → strong-no 마이그레이션
+  return {
+    ...raw,
+    finalDecision: migrateFinalDecision(raw.finalDecision),
+  } as InterviewerNotes
 }
 
 // 새 가치관 5개 키 (altruistic, immersed 제외)

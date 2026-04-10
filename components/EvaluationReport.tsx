@@ -102,12 +102,7 @@ export default function EvaluationReport({
             </h2>
           </div>
           <div className="p-4 max-h-[500px] overflow-y-auto">
-            <QnASection
-              qnaData={qnaData}
-              onGenerateEvaluation={() => {}}
-              evaluationLoading={false}
-              hasReport={true}
-            />
+            <QnASection qnaData={qnaData} />
           </div>
         </div>
       )}

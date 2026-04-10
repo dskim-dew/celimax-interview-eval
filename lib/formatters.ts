@@ -269,7 +269,7 @@ export function formatForShareSummary(report: EvaluationReport, reportUrl?: stri
 
   // 구분선 + 최종 의견 + 면접관 소견
   const notes = report.interviewerNotes;
-  const decisionLabel: Record<string, string> = { drop: '드랍', 'weak-go': 'Weak Go', 'strong-go': 'Strong Go' };
+  const decisionLabel: Record<string, string> = { 'strong-no': 'Strong No', 'weak-no': 'Weak No', 'weak-go': 'Weak Go', 'strong-go': 'Strong Go' };
   if (notes.finalDecision || notes.comment) {
     lines.push('');
     lines.push('================================');

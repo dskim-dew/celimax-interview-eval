@@ -109,6 +109,7 @@ ${scriptText}
 - **답변은 핵심 내용과 구체적 사례를 보존하되, 답변당 3~5문장으로 요약.** 불필요한 서론·반복·장황한 설명은 제거하고, 평가에 필요한 맥락과 사례만 남기기
 - **모든 질문을 빠짐없이 포함하는 것이 최우선. 질문은 절대 생략하지 말 것**
 - **출력이 길어질 경우 미완성 JSON을 출력하지 말고, 현재까지 완성된 Q&A만으로 JSON 배열을 닫고 metadata까지 반드시 출력** (불완전한 JSON 절대 금지)
+- **화자 구분:** 면접 후반부에서 지원자가 질문하고 면접관이 답변하는 경우(역질문 등)를 감지하여 questionSpeaker와 answerSpeaker를 적절히 설정. 기본값은 questionSpeaker="interviewer", answerSpeaker="candidate". 지원자가 질문하는 경우 questionSpeaker="candidate", answerSpeaker="interviewer"로 설정.
 
 **토픽 분류 (반드시 아래 4개 중 하나):**
 - "가치관": 조직 문화 적합성, 팀워크, 업무 스타일, 갈등 해결, 협업 태도
@@ -123,7 +124,9 @@ ${scriptText}
       "id": 1,
       "question": "질문 원문 (추임새만 제거)",
       "answer": "답변 원문 정리 (말더듬·반복만 제거, 내용 보존)",
-      "topic": "가치관" | "역량" | "동기/지원배경" | "기타"
+      "topic": "가치관" | "역량" | "동기/지원배경" | "기타",
+      "questionSpeaker": "interviewer",
+      "answerSpeaker": "candidate"
     }
   ],
   "metadata": {

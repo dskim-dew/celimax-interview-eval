@@ -268,7 +268,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
         {/* 4. 공유 버튼 + 민석님 확인 */}
         <div className="flex items-center justify-center gap-3 pt-2 pb-4">
           <CopyButton report={report} />
-          {report.interviewerNotes.finalDecision !== 'drop' && (
+          {report.interviewerNotes.finalDecision !== 'strong-no' && (
             <div className="flex items-center gap-2 px-4 py-2.5 glass-card rounded-xl">
               <span className="text-sm font-medium text-slate-400 mr-1">민석님 확인</span>
               <button

@@ -59,12 +59,17 @@ export type QnATopicCategory = '가치관' | '역량' | '동기/지원배경' | 
 
 export const QNA_TOPIC_ORDER: QnATopicCategory[] = ['가치관', '역량', '동기/지원배경', '기타'];
 
+// Q&A 화자 역할
+export type SpeakerRole = 'interviewer' | 'candidate';
+
 // Q&A 아이템
 export interface QnAItem {
   id: number;
   question: string;
   answer: string;
   topic: QnATopicCategory;
+  questionSpeaker?: SpeakerRole;  // 기본 'interviewer' (하위 호환)
+  answerSpeaker?: SpeakerRole;    // 기본 'candidate' (하위 호환)
 }
 
 // Q&A 메타데이터
@@ -79,16 +84,21 @@ export interface QnAData {
   metadata: QnAMetadata;
 }
 
-// 최종 의견 선택값
-export type FinalDecision = 'drop' | 'weak-go' | 'strong-go' | null;
+// 최종 의견 선택값 (4단계: Strong No ~ Strong Go)
+export type FinalDecision = 'strong-no' | 'weak-no' | 'weak-go' | 'strong-go' | null;
 
 // 대표 확인 결과
 export type CeoDecision = 'pass' | 'drop' | null;
 
-// 면접관 추가 소견 (간소화)
+// 핵심가치 키 (가치관 5 + 역량 5 + 몰입 = 11개)
+export type CoreValueKey = keyof ValuesEvaluation | keyof CompetenciesEvaluation | 'immersion';
+
+// 면접관 소견 (구조화 포맷)
 export interface InterviewerNotes {
-  comment: string;               // 면접관 소견 (3~5줄)
-  finalDecision?: FinalDecision; // 최종 의견
+  finalDecision?: FinalDecision;   // 최종 의견 (Strong No ~ Strong Go)
+  strengths?: CoreValueKey[];      // 강점 핵심가치 (최대 2개)
+  weaknesses?: CoreValueKey[];     // 약점 핵심가치 (최대 2개)
+  comment: string;                 // 이유 (3~4줄)
 }
 
 // 전체 평가 보고서

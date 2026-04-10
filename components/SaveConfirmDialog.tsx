@@ -14,7 +14,8 @@ export default function SaveConfirmDialog({ report, onConfirm, onCancel, isSavin
   const hasComment = !!report.interviewerNotes.comment?.trim();
   const hasDecision = !!report.interviewerNotes.finalDecision;
   const decisionLabel: Record<string, string> = {
-    drop: '드랍',
+    'strong-no': 'Strong No',
+    'weak-no': 'Weak No',
     'weak-go': 'Weak Go',
     'strong-go': 'Strong Go',
   };

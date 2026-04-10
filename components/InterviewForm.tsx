@@ -377,7 +377,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
           <span className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <ClipboardPaste className="w-4 h-4 text-brand-mid" />
-              Tiro 면접 스크립트
+              면접 스크립트
             </span>
             <a
               href="https://tiro.ooo/n"
@@ -412,7 +412,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
       </div>
 
       <div className="space-y-3">
-        {/* 메인 버튼: 항상 Q&A 정리 후 평가 */}
+        {/* 메인 버튼: Q&A 정리 */}
         <button
           type="submit"
           disabled={isLoading}
@@ -430,7 +430,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
           ) : (
             <>
               <MessageSquare className="w-5 h-5" />
-              스크립트 Q&A 정리 후 평가
+              스크립트 Q&A 정리
             </>
           )}
         </button>

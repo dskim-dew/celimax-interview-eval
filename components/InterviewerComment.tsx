@@ -184,10 +184,16 @@ function RenderedComment({ text }: { text: string }) {
 
 const DECISIONS: { value: FinalDecision; label: string; activeClass: string; dimClass: string }[] = [
   {
-    value: 'drop',
-    label: '드랍',
-    activeClass: 'bg-red-500 text-white border-red-400 shadow-lg shadow-red-500/30',
-    dimClass: 'bg-red-500/10 text-red-400/30 border-red-500/15',
+    value: 'strong-no',
+    label: 'Strong No',
+    activeClass: 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-600/30',
+    dimClass: 'bg-red-600/10 text-red-400/30 border-red-600/15',
+  },
+  {
+    value: 'weak-no',
+    label: 'Weak No',
+    activeClass: 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-500/30',
+    dimClass: 'bg-orange-500/10 text-orange-400/30 border-orange-500/15',
   },
   {
     value: 'weak-go',
@@ -242,7 +248,7 @@ export default function InterviewerComment({ notes, onChange, readOnly = false, 
           <span className="text-xs text-slate-400">선택됨</span>
         )}
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {DECISIONS.map(({ value, label, activeClass, dimClass }) => {
           const isSelected = selected === value;
           const isDimmed = selected !== null && !isSelected;

@@ -131,3 +131,67 @@ export const RECOMMENDATION_CRITERIA = {
   '조건부 추천': '가치관 기본 충족, 일부 역량에 우려 있으나 개선 가능성',
   '비추천': '가치관에 심각한 우려(Taker 경향) 또는 역량·몰입 모두 미흡',
 };
+
+// 핵심가치 한글 라벨 매핑 (가치관 5 + 역량 5 + 몰입 1 = 11개)
+import type { CoreValueKey } from './types';
+
+export const CORE_VALUE_LABELS: Record<CoreValueKey, string> = {
+  // 이타적 가치관
+  honest: '솔직',
+  optimistic: '낙관',
+  proactive: '능동',
+  growth: '성장',
+  respect: '존중',
+  // 문제 해결 역량
+  problemDefinition: '문제 정의',
+  customerFirst: '고객 관점',
+  impact: '임팩트',
+  overCommunication: '오버 커뮤니케이션',
+  expertise: '전문성',
+  // 몰입
+  immersion: '몰입',
+};
+
+// 포지션 레벨별 면접 가이드
+export const POSITION_GUIDES: { key: string; title: string; description: string; criteria: string[] }[] = [
+  {
+    key: 'intern',
+    title: '인턴',
+    description: '잠재력 위주 평가',
+    criteria: [
+      '좋은 가치관과 몰입 태도를 갖추고 있는지 중심으로 봐주세요',
+      '역량은 참고 수준 — 나중에 잘 하실 것 같은지, 성장 가능성에 집중',
+      '구체적 성과보다 문제 접근 방식과 학습 태도를 확인해주세요',
+    ],
+  },
+  {
+    key: 'manager',
+    title: '매니저',
+    description: '실무 역량 + 가치관 균형',
+    criteria: [
+      '역량과 가치관을 균형 있게 평가해주세요',
+      '실제 성과와 프로젝트 경험이 구체적인지 확인',
+      '커뮤니케이션/협업 태도, 오버커뮤니케이션 실천 여부 중점',
+    ],
+  },
+  {
+    key: 'teamLead',
+    title: '팀리더',
+    description: '리더십 + 전문성 중심',
+    criteria: [
+      '팀 빌딩, 의사결정, 갈등 해결 경험을 확인해주세요',
+      '전문성 깊이와 전략적 사고 — "왜"부터 시작하는지',
+      '존중(Debate & Commit), 솔직(Humbly Aggressive) 가치관을 심층 검증',
+    ],
+  },
+];
+
+// 최종 의견 라벨 매핑
+export const DECISION_LABELS: Record<string, string> = {
+  'strong-no': 'Strong No',
+  'weak-no': 'Weak No',
+  'weak-go': 'Weak Go',
+  'strong-go': 'Strong Go',
+  // 레거시 호환
+  'drop': 'Strong No',
+};

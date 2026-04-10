@@ -3,17 +3,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
-import { FileText, Plus, AlertCircle, RefreshCw, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { Plus, AlertCircle, RefreshCw, CheckCircle2, Clock, MessageSquare, Save, BookOpen, ChevronDown } from 'lucide-react';
 import InterviewForm from '@/components/InterviewForm';
-import EvaluationReport from '@/components/EvaluationReport';
 import QnASection from '@/components/QnASection';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SaveConfirmDialog from '@/components/SaveConfirmDialog';
 import InterviewerComment from '@/components/InterviewerComment';
-import { InterviewInfo, EvaluationReport as ReportType, AIEvaluationResponse, InterviewerNotes, QnAData } from '@/lib/types';
+import { InterviewInfo, EvaluationReport as ReportType, InterviewerNotes, QnAData } from '@/lib/types';
+import { POSITION_GUIDES } from '@/lib/constants';
 
 const EMPTY_NOTES: InterviewerNotes = {
   comment: '',
+  strengths: [],
+  weaknesses: [],
 };
 
 // SSE 스트림 소비 헬퍼
@@ -70,23 +72,100 @@ async function consumeSSEStream<T>(
   throw new Error('스트림이 결과 없이 종료되었습니다.');
 }
 
+function PositionGuideAccordion() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="glass-card overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/5 transition-colors"
+      >
+        <span className="flex items-center gap-2 text-sm font-medium text-slate-300">
+          <BookOpen className="w-4 h-4 text-brand-mid" />
+          포지션별 면접 평가 가이드
+        </span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="px-4 pb-4 grid gap-3 sm:grid-cols-3">
+          {POSITION_GUIDES.map((guide) => (
+            <div key={guide.key} className="bg-white/5 rounded-lg p-3 border border-white/10">
+              <h4 className="text-sm font-bold text-white mb-1">{guide.title}</h4>
+              <p className="text-xs text-brand-mid mb-2">{guide.description}</p>
+              <ul className="space-y-1">
+                {guide.criteria.map((c, i) => (
+                  <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5">
+                    <span className="text-brand-mid mt-0.5 shrink-0">-</span>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const router = useRouter();
 
-  // 기존 상태
+  // 상태
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<ReportType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-  // 2단계 프로세스 상태
+  // Q&A 프로세스 상태
   const [qnaData, setQnaData] = useState<QnAData | null>(null);
   const [qnaLoading, setQnaLoading] = useState(false);
-  const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [currentInterviewInfo, setCurrentInterviewInfo] = useState<InterviewInfo | null>(null);
 
-  // 탭 상태
-  const [activeTab, setActiveTab] = useState<'qna' | 'evaluation'>('qna');
+  // beforeunload 경고: 미저장 리포트가 있을 때 이탈 방지
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (report && !isSaved) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [report, isSaved]);
+
+  // localStorage 자동 임시저장 (5초 디바운스)
+  useEffect(() => {
+    if (!report || isSaved) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('celimax-draft', JSON.stringify({
+          report,
+          qnaData,
+          savedAt: new Date().toISOString(),
+        }));
+      } catch { /* quota exceeded 등 무시 */ }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [report, qnaData, isSaved]);
+
+  // 페이지 로드 시 임시저장 복구 확인
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem('celimax-draft');
+      if (!draft) return;
+      const { report: draftReport, qnaData: draftQna, savedAt } = JSON.parse(draft);
+      if (!draftReport) return;
+      const time = new Date(savedAt).toLocaleString('ko-KR');
+      if (confirm(`${time}에 임시 저장된 리포트가 있습니다. 복구하시겠습니까?`)) {
+        setReport(draftReport);
+        if (draftQna) setQnaData(draftQna);
+        if (draftReport.interviewInfo) setCurrentInterviewInfo(draftReport.interviewInfo);
+      }
+      localStorage.removeItem('celimax-draft');
+    } catch { /* 파싱 실패 시 무시 */ }
+  }, []);
 
   // Rate limit 쿨다운 상태
   const [cooldownSec, setCooldownSec] = useState(0);
@@ -112,7 +191,21 @@ export default function Home() {
   }, []);
 
 
-  // 1단계: Q&A 정리
+  // Q&A 정리 후 바로 report 객체 생성
+  const createReportFromQnA = (interviewInfo: InterviewInfo, data: QnAData) => {
+    const now = new Date().toISOString();
+    const newReport: ReportType = {
+      id: uuidv4(),
+      createdAt: now,
+      updatedAt: now,
+      interviewInfo,
+      interviewerNotes: { ...EMPTY_NOTES },
+      qnaData: data,
+    };
+    setReport(newReport);
+  };
+
+  // Q&A 정리
   const handleSubmit = async (interviewInfo: InterviewInfo) => {
     if (cooldownSec > 0) {
       setError(`API 쿨다운 중입니다. ${cooldownSec}초 후에 다시 시도해주세요.`);
@@ -120,7 +213,6 @@ export default function Home() {
     }
     setError(null);
     setReport(null);
-    setCurrentInterviewInfo(interviewInfo);
 
     const submitData = { ...interviewInfo };
     if (interviewInfo.tiroScript && !interviewInfo.transcript) {
@@ -130,7 +222,6 @@ export default function Home() {
 
     setQnaLoading(true);
     setQnaData(null);
-    setActiveTab('qna');
     setStreamProgress(0);
 
     try {
@@ -150,117 +241,13 @@ export default function Home() {
 
       const data = await consumeSSEStream<QnAData>(response, (chars) => setStreamProgress(chars));
       setQnaData(data);
-      setActiveTab('qna');
+      createReportFromQnA(submitData, data);
     } catch (err) {
       const error = err as SSEError;
       if (error.retryAfterSec) startCooldown(error.retryAfterSec);
       setError(error.message || '알 수 없는 오류가 발생했습니다.');
     } finally {
       setQnaLoading(false);
-    }
-  };
-
-  // 2단계: Q&A 기반 평가표 작성
-  const handleGenerateEvaluation = async () => {
-    if (!currentInterviewInfo || !qnaData) return;
-    if (cooldownSec > 0) {
-      setError(`API 쿨다운 중입니다. ${cooldownSec}초 후에 다시 시도해주세요.`);
-      return;
-    }
-
-    setEvaluationLoading(true);
-    setError(null);
-    setStreamProgress(0);
-
-    try {
-      const response = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...currentInterviewInfo,
-          qnaData,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 429 && errorData.retryAfterSec) {
-          startCooldown(errorData.retryAfterSec);
-        }
-        throw new Error(errorData.error || '평가표 작성에 실패했습니다.');
-      }
-
-      const evaluation = await consumeSSEStream<AIEvaluationResponse>(response, (chars) => setStreamProgress(chars));
-
-      const now = new Date().toISOString();
-      const newReport: ReportType = {
-        id: uuidv4(),
-        createdAt: now,
-        updatedAt: now,
-        interviewInfo: currentInterviewInfo,
-        values: evaluation.values,
-        competencies: evaluation.competencies,
-        immersion: evaluation.immersion,
-        overall: evaluation.overall,
-        interviewerNotes: { ...EMPTY_NOTES },
-        qnaData,
-      };
-
-      setReport(newReport);
-      setActiveTab('evaluation');
-    } catch (err) {
-      const error = err as SSEError;
-      if (error.retryAfterSec) startCooldown(error.retryAfterSec);
-      setError(error.message || '알 수 없는 오류가 발생했습니다.');
-    } finally {
-      setEvaluationLoading(false);
-    }
-  };
-
-  // Q&A 없이 직접 평가 생성 (빠른 모드)
-  const generateEvaluationDirect = async (interviewInfo: InterviewInfo) => {
-    setEvaluationLoading(true);
-    setError(null);
-    setStreamProgress(0);
-
-    try {
-      const response = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(interviewInfo),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 429 && errorData.retryAfterSec) {
-          startCooldown(errorData.retryAfterSec);
-        }
-        throw new Error(errorData.error || '보고서 생성에 실패했습니다.');
-      }
-
-      const evaluation = await consumeSSEStream<AIEvaluationResponse>(response, (chars) => setStreamProgress(chars));
-
-      const now = new Date().toISOString();
-      const newReport: ReportType = {
-        id: uuidv4(),
-        createdAt: now,
-        updatedAt: now,
-        interviewInfo,
-        values: evaluation.values,
-        competencies: evaluation.competencies,
-        immersion: evaluation.immersion,
-        overall: evaluation.overall,
-        interviewerNotes: { ...EMPTY_NOTES },
-      };
-
-      setReport(newReport);
-      setActiveTab('evaluation');
-    } catch (err) {
-      const error = err as SSEError;
-      if (error.retryAfterSec) startCooldown(error.retryAfterSec);
-      setError(error.message || '알 수 없는 오류가 발생했습니다.');
-    } finally {
-      setEvaluationLoading(false);
     }
   };
 
@@ -290,7 +277,9 @@ export default function Home() {
         body: JSON.stringify(updatedReport),
       });
       if (!res.ok) throw new Error('저장 실패');
+      setIsSaved(true);
       setShowSaveDialog(false);
+      try { localStorage.removeItem('celimax-draft'); } catch {}
       router.push(`/report/${updatedReport.id}`);
     } catch {
       alert('저장에 실패했습니다. 다시 시도해주세요.');
@@ -298,32 +287,22 @@ export default function Home() {
     }
   };
 
-
-  // Q&A 없이 바로 평가 또는 면접관 소견만 작성
+  // 면접관 소견만 작성 (스크립트 없이)
   const handleDirectSubmit = async (interviewInfo: InterviewInfo) => {
     setError(null);
     setReport(null);
     setQnaData(null);
     setCurrentInterviewInfo(interviewInfo);
 
-    const hasScript = (interviewInfo.tiroScript || '').trim().length > 0;
-
-    if (!hasScript) {
-      // 스크립트 없음: AI 분석 없이 면접관 소견만 작성
-      const now = new Date().toISOString();
-      const newReport: ReportType = {
-        id: uuidv4(),
-        createdAt: now,
-        updatedAt: now,
-        interviewInfo,
-        interviewerNotes: { ...EMPTY_NOTES },
-      };
-      setReport(newReport);
-      setActiveTab('evaluation');
-    } else {
-      // 스크립트 있음: AI 직접 평가
-      await generateEvaluationDirect(interviewInfo);
-    }
+    const now = new Date().toISOString();
+    const newReport: ReportType = {
+      id: uuidv4(),
+      createdAt: now,
+      updatedAt: now,
+      interviewInfo,
+      interviewerNotes: { ...EMPTY_NOTES },
+    };
+    setReport(newReport);
   };
 
   const handleNewReport = () => {
@@ -331,13 +310,9 @@ export default function Home() {
     setQnaData(null);
     setCurrentInterviewInfo(null);
     setError(null);
-    setActiveTab('qna');
+    setIsSaved(false);
+    try { localStorage.removeItem('celimax-draft'); } catch {}
   };
-
-  const isAnyLoading = qnaLoading || evaluationLoading;
-
-  // 탭 컨테이너를 보여줄 조건: Q&A 또는 평가표가 있을 때
-  const showTabs = (qnaData || report) && !isAnyLoading;
 
   return (
     <div className="space-y-6">
@@ -355,13 +330,12 @@ export default function Home() {
       )}
 
       {/* 메인 콘텐츠: 입력 폼 */}
-      {!report && !qnaData && !isAnyLoading && (
-        <InterviewForm onSubmit={handleSubmit} onDirectSubmit={handleDirectSubmit} isLoading={isAnyLoading} />
+      {!report && !qnaData && !qnaLoading && (
+        <InterviewForm onSubmit={handleSubmit} onDirectSubmit={handleDirectSubmit} isLoading={qnaLoading} />
       )}
 
       {/* 로딩 */}
       {qnaLoading && <LoadingSpinner phase="qna" streamedChars={streamProgress} />}
-      {evaluationLoading && !qnaLoading && <LoadingSpinner phase="evaluation" streamedChars={streamProgress} />}
 
       {/* 쿨다운 타이머 */}
       {cooldownSec > 0 && !error && (
@@ -406,84 +380,28 @@ export default function Home() {
         </div>
       )}
 
-      {/* 탭 컨테이너 */}
-      {showTabs && (
+      {/* Q&A 섹션 (탭 없이 직렬 표시) */}
+      {qnaData && !qnaLoading && (
         <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
-          {/* 탭 헤더 */}
-          <div className="tab-buttons flex flex-col sm:flex-row gap-0 border-b border-white/20">
-            {/* Q&A 탭 (Q&A 데이터가 있을 때만 표시) */}
-            {qnaData && (
-              <button
-                onClick={() => setActiveTab('qna')}
-                className={`flex-1 sm:flex-none px-6 py-4 font-semibold transition-all duration-200 ${
-                  activeTab === 'qna'
-                    ? 'text-white border-b-2 border-brand-deep bg-brand-deep/10'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  <span>Q&A 스크립트</span>
-                  <CheckCircle2 className="w-4 h-4 text-green-400 ml-1" />
-                </div>
-              </button>
-            )}
-
-            {/* 평가표 탭 */}
-            <button
-              onClick={() => setActiveTab('evaluation')}
-              disabled={!report}
-              className={`flex-1 sm:flex-none px-6 py-4 font-semibold transition-all duration-200 ${
-                activeTab === 'evaluation'
-                  ? 'text-white border-b-2 border-brand-deep bg-brand-deep/15'
-                  : report
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                    : 'text-slate-600 cursor-not-allowed'
-              }`}
-            >
-              <div className="flex items-center justify-center sm:justify-start gap-2">
-                <FileText className="w-5 h-5" />
-                <span>평가표</span>
-                {report && <CheckCircle2 className="w-4 h-4 text-green-400 ml-1" />}
-                {!report && evaluationLoading && (
-                  <span className="text-xs text-slate-500 ml-1">작성 중...</span>
-                )}
-              </div>
-            </button>
+          <div className="px-6 py-4 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-brand-mid" />
+              <h2 className="text-lg font-bold text-white">Q&A 스크립트</h2>
+              <CheckCircle2 className="w-4 h-4 text-green-400 ml-1" />
+            </div>
           </div>
-
-          {/* 탭 콘텐츠 */}
           <div className="p-6 sm:p-8">
-            {/* Q&A 탭 */}
-            {activeTab === 'qna' && qnaData && (
-              <div className="animate-fadeIn">
-                <QnASection
-                  qnaData={qnaData}
-                  onGenerateEvaluation={handleGenerateEvaluation}
-                  evaluationLoading={evaluationLoading}
-                  hasReport={!!report}
-                  onSwitchToEvaluation={() => setActiveTab('evaluation')}
-                />
-              </div>
-            )}
-
-            {/* 평가표 탭 */}
-            {activeTab === 'evaluation' && report && (
-              <div className="animate-fadeIn">
-                <EvaluationReport
-                  report={report}
-                  hideNotes
-                />
-              </div>
-            )}
-
+            <QnASection qnaData={qnaData} />
           </div>
         </div>
       )}
 
-      {/* 소견란 + 저장 버튼 (탭 바깥, 탭 전환해도 유지) */}
-      {report && !isAnyLoading && (
+      {/* 소견란 + 저장 버튼 */}
+      {report && !qnaLoading && (
         <div className="space-y-6">
+          {/* 포지션별 면접 가이드 (접이식) */}
+          <PositionGuideAccordion />
+
           <InterviewerComment
             notes={report.interviewerNotes}
             onChange={handleNotesChange}
@@ -493,12 +411,13 @@ export default function Home() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`flex items-center gap-2 px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              className={`flex items-center gap-3 px-12 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${
                 isSaving
                   ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                  : 'bg-brand-deep text-white hover:bg-brand-mid shadow-lg shadow-brand-deep/20'
+                  : 'bg-gradient-to-r from-brand-deep to-emerald-600 text-white hover:from-brand-mid hover:to-emerald-500 shadow-xl shadow-brand-deep/30 hover:shadow-2xl hover:scale-[1.02]'
               }`}
             >
+              <Save className="w-5 h-5" />
               {isSaving ? '저장 중...' : '최종 리포트 저장'}
             </button>
           </div>
@@ -517,4 +436,3 @@ export default function Home() {
     </div>
   );
 }
-
