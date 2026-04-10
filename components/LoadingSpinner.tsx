@@ -126,14 +126,14 @@ export default function LoadingSpinner({
       </div>
 
       {/* 플로우 안내 */}
-      <div className="mt-8 w-full max-w-2xl">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Q&A 정리 후 진행 순서</p>
-        <div className="flex items-stretch justify-center gap-2">
+      <div className="mt-8 w-full max-w-4xl">
+        <p className="text-sm font-bold text-slate-200 mb-3 text-center border-b border-white/10 pb-2">Q&A 정리 후 진행 순서</p>
+        <div className="flex items-stretch gap-2">
           {FLOW_STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
-              <div key={i} className="flex items-center gap-2">
-                <div className="flex-1 flex flex-col items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center min-w-[140px]">
+              <div key={i} className="flex items-center gap-2 flex-1">
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center">
                   <Icon className="w-4 h-4 text-brand-mid" />
                   <span className="text-sm font-semibold text-white">{step.label}</span>
                   <span className="text-[11px] text-slate-400 leading-tight">{step.desc}</span>
@@ -148,8 +148,8 @@ export default function LoadingSpinner({
       </div>
 
       {/* 최종 의견 판단 기준 */}
-      <div className="mt-6 w-full max-w-3xl">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">최종 의견 판단 기준</p>
+      <div className="mt-6 w-full max-w-4xl">
+        <p className="text-sm font-bold text-slate-200 mb-3 text-center border-b border-white/10 pb-2">최종 의견 판단 기준</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {DECISION_GUIDE.map((d) => (
             <div key={d.label} className={`rounded-xl border p-3 ${d.color}`}>
