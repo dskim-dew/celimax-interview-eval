@@ -127,16 +127,16 @@ export default function LoadingSpinner({
 
       {/* 플로우 안내 */}
       <div className="mt-8 w-full max-w-4xl">
-        <p className="text-sm font-bold text-slate-200 mb-3 text-center border-b border-white/10 pb-2">Q&A 정리 후 진행 순서</p>
-        <div className="flex items-stretch gap-2">
+        <p className="text-base font-bold text-white mb-4 text-center border-b border-white/10 pb-2">Q&A 정리 후 진행 순서</p>
+        <div className="flex items-stretch gap-3">
           {FLOW_STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
-              <div key={i} className="flex items-center gap-2 flex-1">
-                <div className="flex-1 flex flex-col items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center">
-                  <Icon className="w-4 h-4 text-brand-mid" />
-                  <span className="text-sm font-semibold text-white">{step.label}</span>
-                  <span className="text-[11px] text-slate-400 leading-tight">{step.desc}</span>
+              <div key={i} className="flex items-center gap-3 flex-1">
+                <div className="flex-1 flex flex-col items-center gap-2 px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-center">
+                  <Icon className="w-5 h-5 text-brand-mid" />
+                  <span className="text-base font-semibold text-white">{step.label}</span>
+                  <span className="text-xs text-slate-400 leading-snug">{step.desc}</span>
                 </div>
                 {i < FLOW_STEPS.length - 1 && (
                   <ArrowRight className="w-4 h-4 text-slate-600 shrink-0" />
@@ -149,19 +149,19 @@ export default function LoadingSpinner({
 
       {/* 최종 의견 판단 기준 */}
       <div className="mt-6 w-full max-w-4xl">
-        <p className="text-sm font-bold text-slate-200 mb-3 text-center border-b border-white/10 pb-2">최종 의견 판단 기준</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <p className="text-base font-bold text-white mb-4 text-center border-b border-white/10 pb-2">최종 의견 판단 기준</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {DECISION_GUIDE.map((d) => (
-            <div key={d.label} className={`rounded-xl border p-3 ${d.color}`}>
-              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold mb-2 ${d.badgeClass}`}>
+            <div key={d.label} className={`rounded-xl border p-4 ${d.color}`}>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold mb-3 ${d.badgeClass}`}>
                 {d.label}
               </span>
-              <p className="text-[11px] text-slate-300 leading-relaxed mb-1.5">
-                <span className="text-slate-500 font-medium">기준</span>{' '}
+              <p className="text-xs text-slate-300 leading-relaxed mb-2">
+                <span className="text-slate-400 font-semibold">기준</span>{' '}
                 {d.criteria}
               </p>
-              <p className={`text-[11px] leading-relaxed ${d.processColor}`}>
-                <span className="text-slate-500 font-medium">절차</span>{' '}
+              <p className={`text-xs leading-relaxed ${d.processColor}`}>
+                <span className="text-slate-400 font-semibold">절차</span>{' '}
                 {d.process}
               </p>
             </div>
