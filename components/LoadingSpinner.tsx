@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle2, PenLine, Save, ArrowRight } from 'lucide-react';
 
 const STEPS = [
   { time: 0, label: '스크립트 분석 중...' },
@@ -9,10 +9,45 @@ const STEPS = [
   { time: 15, label: '토픽 분류 중...' },
 ];
 
-const TIPS = [
-  'Q&A 정리 후 내용을 확인하고 하이어링 매니저 소견을 작성합니다',
-  '최종 의견은 Strong No / Weak No / Weak Go / Strong Go 중 선택합니다',
-  '평가 기준은 헤더의 "인터뷰 가이드"를 참고하세요',
+const FLOW_STEPS = [
+  { icon: CheckCircle2, label: 'Q&A 확인', desc: 'AI가 정리한 Q&A 내용을 검토합니다' },
+  { icon: PenLine, label: '소견 작성', desc: '최종 의견 + 강점/약점 핵심가치 + 이유 작성' },
+  { icon: Save, label: '저장', desc: '리포트를 저장하면 공유 링크가 생성됩니다' },
+];
+
+const DECISION_GUIDE = [
+  {
+    label: 'Strong No',
+    color: 'bg-red-500/15 border-red-500/30',
+    badgeClass: 'bg-red-600 text-white',
+    criteria: '명확한 드랍 사유 존재',
+    process: '민석님 확인 없이 HR 바로 불합격 처리',
+    processColor: 'text-slate-400',
+  },
+  {
+    label: 'Weak No',
+    color: 'bg-orange-500/10 border-orange-500/25',
+    badgeClass: 'bg-orange-500 text-white',
+    criteria: '강점도 있지만 우려가 더 커서 드랍',
+    process: '민석님 확인 없이 HR 바로 불합격 처리',
+    processColor: 'text-slate-400',
+  },
+  {
+    label: 'Weak Go',
+    color: 'bg-amber-400/10 border-amber-400/25',
+    badgeClass: 'bg-amber-400 text-slate-900',
+    criteria: '우려의 크리티컬 여부, 강점이 상쇄할 수 있는지 논의 필요',
+    process: '민석님 확인 → 불합격 / 추가 챌린지 / 2차 결정',
+    processColor: 'text-brand-light',
+  },
+  {
+    label: 'Strong Go',
+    color: 'bg-emerald-500/10 border-emerald-500/25',
+    badgeClass: 'bg-emerald-500 text-white',
+    criteria: '역량과 가치관 모두 Fit',
+    process: '민석님 확인 → 불합격 / 추가 챌린지 / 2차 결정',
+    processColor: 'text-brand-light',
+  },
 ];
 
 interface LoadingSpinnerProps {
@@ -90,16 +125,48 @@ export default function LoadingSpinner({
         )}
       </div>
 
-      {/* 팁 — 3열 그리드 */}
-      <div className="mt-6 grid grid-cols-3 gap-3 w-full max-w-2xl">
-        {TIPS.map((tip, i) => (
-          <div key={i} className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center">
-            <p className="text-xs text-slate-400">
-              <span className="text-brand-light font-medium block mb-1">Tip {i + 1}</span>
-              {tip}
-            </p>
-          </div>
-        ))}
+      {/* 플로우 안내 */}
+      <div className="mt-8 w-full max-w-2xl">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Q&A 정리 후 진행 순서</p>
+        <div className="flex items-stretch justify-center gap-2">
+          {FLOW_STEPS.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center min-w-[140px]">
+                  <Icon className="w-4 h-4 text-brand-mid" />
+                  <span className="text-sm font-semibold text-white">{step.label}</span>
+                  <span className="text-[11px] text-slate-400 leading-tight">{step.desc}</span>
+                </div>
+                {i < FLOW_STEPS.length - 1 && (
+                  <ArrowRight className="w-4 h-4 text-slate-600 shrink-0" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 최종 의견 판단 기준 */}
+      <div className="mt-6 w-full max-w-3xl">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">최종 의견 판단 기준</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {DECISION_GUIDE.map((d) => (
+            <div key={d.label} className={`rounded-xl border p-3 ${d.color}`}>
+              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold mb-2 ${d.badgeClass}`}>
+                {d.label}
+              </span>
+              <p className="text-[11px] text-slate-300 leading-relaxed mb-1.5">
+                <span className="text-slate-500 font-medium">기준</span>{' '}
+                {d.criteria}
+              </p>
+              <p className={`text-[11px] leading-relaxed ${d.processColor}`}>
+                <span className="text-slate-500 font-medium">절차</span>{' '}
+                {d.process}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
