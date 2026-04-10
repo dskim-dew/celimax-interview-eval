@@ -50,25 +50,23 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
         >
           {/* 한 줄 정보 */}
           <div className="flex items-center gap-3 flex-1 min-w-0 text-sm">
-            <span className="font-bold text-white shrink-0">{report.interviewInfo.position}</span>
-            <span className="font-bold text-white truncate w-[72px] shrink-0">
+            <span className="font-bold text-white min-w-[220px] truncate">{report.interviewInfo.position}</span>
+            <span className="font-bold text-white w-[72px] shrink-0 truncate">
               {report.interviewInfo.candidateName}
             </span>
-            {report.interviewInfo.interviewRound && (
-              <span className="text-brand-light text-xs w-[36px] shrink-0 text-center">{report.interviewInfo.interviewRound}</span>
-            )}
+            <span className="text-brand-light text-xs w-[36px] shrink-0 text-center">{report.interviewInfo.interviewRound || '-'}</span>
             <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1 w-[64px]">
               <Users className="w-3 h-3 text-brand-mid" />
               {report.interviewInfo.interviewerName}
             </span>
-            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1">
+            <span className="text-slate-300 text-xs shrink-0 flex items-center gap-1 w-[180px]">
               <Calendar className="w-3 h-3 text-brand-mid" />
               {formatDateWithDay(report.interviewInfo.interviewDate)}
             </span>
             {/* 구분선 */}
             <span className="w-px h-4 bg-white/15 shrink-0" />
             {/* HM 최종의견 */}
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 w-[80px] text-center ${
               report.interviewerNotes.finalDecision === 'strong-go'
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : report.interviewerNotes.finalDecision === 'weak-go'
@@ -87,7 +85,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
             </span>
             {/* 민석님 확인 */}
             {report.interviewerNotes.finalDecision !== 'strong-no' && (
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${
+              <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 w-[48px] text-center ${
                 report.ceoDecision === 'pass'
                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   : report.ceoDecision === 'drop'
