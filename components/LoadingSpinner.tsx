@@ -3,44 +3,26 @@
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
-type Phase = 'qna' | 'evaluation';
+const STEPS = [
+  { time: 0, label: '스크립트 분석 중...' },
+  { time: 5, label: 'Q&A 추출 중...' },
+  { time: 15, label: '토픽 분류 중...' },
+];
 
-const STEPS: Record<Phase, { time: number; label: string }[]> = {
-  qna: [
-    { time: 0, label: '스크립트 분석 중...' },
-    { time: 5, label: 'Q&A 추출 중...' },
-    { time: 15, label: '토픽 분류 중...' },
-  ],
-  evaluation: [
-    { time: 0, label: '가치관 분석 중...' },
-    { time: 5, label: '역량 분석 중...' },
-    { time: 15, label: '종합 평가 작성 중...' },
-  ],
-};
-
-const TIPS: Record<Phase, string[]> = {
-  qna: [
-    'Q&A 정리 후 내용을 확인하고 평가표 작성으로 넘어갑니다',
-    '최종 의견은 드랍 / Weak Go / Strong Go 중 선택합니다',
-    '평가 기준은 헤더의 "인터뷰 가이드"를 참고하세요',
-  ],
-  evaluation: [
-    '가치관 5개: 솔직, 낙관, 능동, 성장, 존중',
-    '역량 5개: 문제 정의, 고객 관점, 임팩트, 커뮤니케이션, 전문성',
-    '몰입: 내적 동기부여와 자발적 시간 투자',
-  ],
-};
+const TIPS = [
+  'Q&A 정리 후 내용을 확인하고 하이어링 매니저 소견을 작성합니다',
+  '최종 의견은 Strong No / Weak No / Weak Go / Strong Go 중 선택합니다',
+  '평가 기준은 헤더의 "인터뷰 가이드"를 참고하세요',
+];
 
 interface LoadingSpinnerProps {
   message?: string;
   streamedChars?: number;
-  phase?: Phase;
 }
 
 export default function LoadingSpinner({
   message,
   streamedChars,
-  phase = 'qna',
 }: LoadingSpinnerProps) {
   const [elapsed, setElapsed] = useState(0);
 
@@ -50,7 +32,7 @@ export default function LoadingSpinner({
   }, []);
 
   // 현재 단계 결정
-  const steps = STEPS[phase];
+  const steps = STEPS;
   let currentStepIdx = 0;
   for (let i = steps.length - 1; i >= 0; i--) {
     if (elapsed >= steps[i].time) {
@@ -110,7 +92,7 @@ export default function LoadingSpinner({
 
       {/* 팁 — 3열 그리드 */}
       <div className="mt-6 grid grid-cols-3 gap-3 w-full max-w-2xl">
-        {TIPS[phase].map((tip, i) => (
+        {TIPS.map((tip, i) => (
           <div key={i} className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center">
             <p className="text-xs text-slate-400">
               <span className="text-brand-light font-medium block mb-1">Tip {i + 1}</span>

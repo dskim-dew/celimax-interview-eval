@@ -332,7 +332,7 @@ export default function Home() {
       )}
 
       {/* 로딩 */}
-      {qnaLoading && <LoadingSpinner phase="qna" streamedChars={streamProgress} />}
+      {qnaLoading && <LoadingSpinner streamedChars={streamProgress} />}
 
       {/* 쿨다운 타이머 */}
       {cooldownSec > 0 && !error && (
