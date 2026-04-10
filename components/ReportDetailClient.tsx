@@ -96,8 +96,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
     }
   };
 
-  const hasAIAnalysis = !!(report.overall || report.competencies || report.values);
-
   const tocItems: TOCItem[] = useMemo(() => {
     const items: TOCItem[] = [
       { id: 'section-info', label: '기본 정보' },
@@ -106,16 +104,17 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
     if (report.qnaData) {
       items.push({ id: 'section-qna', label: 'Q&A 스크립트' });
     }
-    if (hasAIAnalysis) {
-      items.push(
-        { id: 'section-overall', label: '종합 분석' },
-        { id: 'section-competency', label: '문제 해결 역량' },
-        { id: 'section-values', label: '이타적 가치관' },
-        { id: 'section-immersion', label: '몰입' },
-      );
-    }
     return items;
-  }, [report.qnaData, hasAIAnalysis]);
+  }, [report.qnaData]);
+
+  // AI 평가표 데이터를 제거한 리포트 (표시하지 않음)
+  const reportWithoutAI: ReportType = useMemo(() => ({
+    ...report,
+    values: undefined,
+    competencies: undefined,
+    immersion: undefined,
+    overall: undefined,
+  }), [report]);
 
   const inputClass = 'px-3 py-1.5 bg-white/10 border border-slate-500/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-mid focus:border-transparent transition';
 
@@ -249,7 +248,7 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
 
         {/* 2. 소견 → 종합 분석 → 직무역량/핵심가치/Q&A */}
         <EvaluationReport
-          report={report}
+          report={reportWithoutAI}
           onNotesChange={handleNotesChange}
           readOnly={!editingNotes}
           hideHeader={true}
@@ -257,10 +256,6 @@ export default function ReportDetailClient({ report: initialReport }: ReportDeta
           onToggleNotesEdit={() => setEditingNotes(v => !v)}
           sectionIds={{
             notes: 'section-notes',
-            overall: 'section-overall',
-            competency: 'section-competency',
-            immersion: 'section-immersion',
-            values: 'section-values',
             qna: 'section-qna',
           }}
         />
