@@ -122,7 +122,6 @@ export default function Home() {
   // Q&A 프로세스 상태
   const [qnaData, setQnaData] = useState<QnAData | null>(null);
   const [qnaLoading, setQnaLoading] = useState(false);
-  const [currentInterviewInfo, setCurrentInterviewInfo] = useState<InterviewInfo | null>(null);
 
   // beforeunload 경고: 미저장 리포트가 있을 때 이탈 방지
   useEffect(() => {
@@ -161,7 +160,6 @@ export default function Home() {
       if (confirm(`${time}에 임시 저장된 리포트가 있습니다. 복구하시겠습니까?`)) {
         setReport(draftReport);
         if (draftQna) setQnaData(draftQna);
-        if (draftReport.interviewInfo) setCurrentInterviewInfo(draftReport.interviewInfo);
       }
       localStorage.removeItem('celimax-draft');
     } catch { /* 파싱 실패 시 무시 */ }
@@ -218,7 +216,7 @@ export default function Home() {
     if (interviewInfo.tiroScript && !interviewInfo.transcript) {
       submitData.transcript = interviewInfo.tiroScript;
     }
-    setCurrentInterviewInfo(submitData);
+
 
     setQnaLoading(true);
     setQnaData(null);
@@ -292,7 +290,7 @@ export default function Home() {
     setError(null);
     setReport(null);
     setQnaData(null);
-    setCurrentInterviewInfo(interviewInfo);
+
 
     const now = new Date().toISOString();
     const newReport: ReportType = {
@@ -308,7 +306,6 @@ export default function Home() {
   const handleNewReport = () => {
     setReport(null);
     setQnaData(null);
-    setCurrentInterviewInfo(null);
     setError(null);
     setIsSaved(false);
     try { localStorage.removeItem('celimax-draft'); } catch {}
