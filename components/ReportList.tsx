@@ -50,7 +50,7 @@ export default function ReportList({ reports, onDelete }: ReportListProps) {
         >
           {/* 한 줄 정보 */}
           <div className="flex items-center gap-3 flex-1 min-w-0 text-sm">
-            <span className="font-bold text-white truncate w-[140px] shrink-0">{report.interviewInfo.position}</span>
+            <span className="font-bold text-white shrink-0">{report.interviewInfo.position}</span>
             <span className="font-bold text-white truncate w-[72px] shrink-0">
               {report.interviewInfo.candidateName}
             </span>
