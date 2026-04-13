@@ -394,7 +394,7 @@ export default function InterviewForm({ onSubmit, onDirectSubmit, isLoading }: I
         <div className="mb-2 p-3 bg-brand-deep/15 border border-brand-deep/30 rounded-lg">
           <p className="text-sm text-brand-light flex items-center gap-2">
             <span>💡</span>
-            Tiro에서 <strong>스크립트 → 복사 → &quot;LLM용으로 복사&quot;</strong>를 선택하여 아래에 붙여넣어주세요
+            인터뷰를 녹음하신 <strong>스크립트</strong>를 복사해 아래에 붙여 넣어주세요.
           </p>
         </div>
         <textarea
